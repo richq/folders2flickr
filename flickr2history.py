@@ -41,7 +41,7 @@ def getPhotoIDbyTag(tag):
         retries = retries + 1
         
     if (not photos or len(photos) == 0):
-        logging.error("No image in Flickr with tags %s (something failed during its upload)" % out)
+        logging.error("No image in Flickr with tags %s" % out)
         return None
     
     logging.debug("Tag=%s found %d" % (out, len(photos)))

@@ -63,19 +63,18 @@ def createSets( historyFile):
      for image in keys:
         if(image.startswith('\\')): #filter out photoid keys
             setName = os.path.dirname(image) #set name is realy a directory
-            logging.debug("Adding image %s" % image)
-            photoSet.append( uploaded.get(image))
             if(not lastSetName == setName and not lastSetName == ''):
                 #new set is starting so save last
-                logging.debug( "Creating set %s with %d pictures" % lastSetName, len(photoSet) )
+                #logging.debug( "Creating set %s with %d pictures" % (lastSetName, len(photoSet)) )
                 creatSet(photoSet, lastSetName)
                 photoSet = []
-                photoSet.append(uploaded.get(image))
+            logging.debug("Adding image %s" % image)
+            photoSet.append(uploaded.get(image))
             lastSetName = setName
           
                 
-    #dont forget to create last set
-     logging.debug( "Creating set %s with %d pictures" % setName, len(photoSet) )
+     #dont forget to create last set
+     #logging.debug( "Creating set %s with %d pictures" % (setName, len(photoSet)) )
      creatSet(photoSet, setName)
      
 

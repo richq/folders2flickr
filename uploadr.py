@@ -447,11 +447,15 @@ if __name__ == "__main__":
         logging.getLogger('').addHandler(console)
         
         flick = Uploadr()
-        flick.upload()  #uploads all new images to flickr
 
         images = flick.grabNewImages()
         #this is just double checking if everything is on Flickr what is in the history file
+	# in another words it will restore history file if deleted by comparing flickr with folders
         flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
+
+	#uploads all images that are in folders and not in history file        
+        flick.upload()  #uploads all new images to flickr
+
         
         #this will organize uploaded files into sets with the names according to tags
         tags2set.createSets( HISTORY_FILE)
