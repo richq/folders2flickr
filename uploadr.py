@@ -296,8 +296,8 @@ class Uploadr:
             (dirpath, dirnames, filenames) = data
             for f in filenames :
                 ext = f.lower().split(".")[-1]
-                if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" 
-                    or ext == "mov" or ext == "wmw" or ext == "mpeg" or ext == "mp4" 
+                if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "bmp" or ext == "avi" 
+                    or ext == "mov" or ext == "wmv" or ext == "mpeg" or ext == "mp4" 
                     or ext == "m2p" or ext == "3gp" or ext == "m2ts"):
                     images.append( os.path.normpath( dirpath + "/" + f ) )
         images.sort()
