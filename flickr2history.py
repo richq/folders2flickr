@@ -3,36 +3,27 @@
 
 __author__ = "pkolarov@gmail.com"
 
-import sys, os, shelve, logging,string
+import shelve,dbhash,anydbm
+import sys, os, logging,string
 import flickr
 
 user = None
 
-#remove items in checked from seq
-def removeTags(seq):  
-    # order preserving 
-    checked = ["and","in","at","a","the","of","an", "&", "to", "on", "-","+","&" ]
-    out =[]
-    for e in seq: 
-        if e not in checked: 
-            out.append(e) 
-    return out
+
 
 #get one and only one photo for the given tags or None
 #this works only if we previously tagged all the pics on Flickr with uploader tool automaticaly
 #
 #Plus delete images that contain the same TAGS !!!!
 def getPhotoIDbyTag(tag):
-    tags=tag.split()
-     #remove multiple whitespaces,and  "and","in","at","a","the","of","an", "&" etc.
-    tags = removeTags(tags)
-    out=string.join(tags,",")
+  
+    
     retries = 0
     photos = None
     while (retries < 3):
         try:
                 logging.debug(user.id)
-                photos = flickr.photos_search(user_id=user.id, auth=all, tags=out,tag_mode='all')
+                photos = flickr.photos_search(user_id=user.id, auth=all, tags=tag,tag_mode='any')
                 break
         except:
                 logging.error("Flickr error while searching ....retrying")
@@ -41,12 +32,12 @@ def getPhotoIDbyTag(tag):
         retries = retries + 1
         
     if (not photos or len(photos) == 0):
-        logging.error("No image in Flickr with tags %s" % out)
+        logging.error("No image in Flickr with tags %s (possibly deleted in Flickr by user)" % tag)
         return None
     
-    logging.debug("Tag=%s found %d" % (out, len(photos)))
+    logging.debug("Tag=%s found %d" % (tag, len(photos)))
     while (len(photos)>1):
-        logging.debug( "Tag %s matches %d images!" % (out, len(photos)))
+        logging.debug( "Tag %s matches %d images!" % (tag, len(photos)))
         logging.debug("Removing other images")
         try:
             photos.pop().delete()
@@ -71,14 +62,16 @@ def reshelf(images,  imageDir, historyFile):
         
      for image in images:
         image = image[len(imageDir):] #remove absolute directory
-        uploaded = shelve.open( historyFile )
+        uploaded = shelve.open( historyFile )   #its better to always reopen this file
         if ( not uploaded.has_key(str(image) ) ):
-                  photo = getPhotoIDbyTag(image)
+                  #each picture should have one id tag in the folder format with spaces replaced by # and starting with #
+                  flickrtag = '#' + image.replace(' ','#')
+                  photo = getPhotoIDbyTag(flickrtag)
                   logging.debug(image)
                   if(not photo):
-                       uploaded.close()
+                       uploaded.close()  # flush the DB file
                        continue
-                  #logging.debug(photo.id)
+                  logging.debug("Reregistering %s photo in local history file" % image)
                   uploaded[ str(image)] = str(photo.id)
                   uploaded[ str(photo.id) ] =str(image)
                   uploaded.close()

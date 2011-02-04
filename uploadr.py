@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import sys, time, os, urllib2, shelve, string, logging, flickr
+import shelve,dbhash,anydbm
+import sys, time, os, urllib2,  string, logging, flickr, re
 import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, flickr2history, tags2set
 from ConfigParser import *
 
@@ -281,8 +282,6 @@ class Uploadr:
         print HISTORY_FILE
         self.uploaded = shelve.open( HISTORY_FILE )
         newImages = self.grabNewImages()
-        if ( not self.checkToken() ):
-            self.authenticate()
         
         for image in newImages:
             self.uploadImage( image )
@@ -296,10 +295,8 @@ class Uploadr:
             (dirpath, dirnames, filenames) = data
             for f in filenames :
                 ext = f.lower().split(".")[-1]
-                if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "bmp" or ext == "avi" 
-                    or ext == "mov" or ext == "wmv" or ext == "mpeg" or ext == "mp4" 
-                    or ext == "m2p" or ext == "3gp" or ext == "m2ts"):
-                    images.append( os.path.normpath( dirpath + "/" + f ) )
+                if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov" or ext == "wmw" or ext == "mpeg" or ext == "mp4" or ext == "m2p" or ext == "3gp" or ext == "m2ts"):
+                  images.append( os.path.normpath( dirpath + "/" + f ) )
         images.sort()
         return images
 
@@ -319,7 +316,13 @@ class Uploadr:
 
                 
                 #print folderTag
-                picTags =folderTag+' '
+                #make one tag equal to original file path with spaces replaced by # and start it with # (for easier recognition) since space is used as TAG separator by flickr
+                # this is needed for later syncing flickr with folders 
+                realTags  = folderTag.replace('\\',' ')   # look for / or \ or _ or .  and replace them with SPACE to make real Tags 
+                realTags =  realTags.replace('/',' ')   # these will be the real tags ripped from folders
+                realTags =  realTags.replace('_',' ')
+                realTags =  realTags.replace('.',' ')  
+                picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
 
                 if exiftags == {}:
                    logging.debug( 'NO_EXIF_HEADER for %s' % image)
@@ -448,15 +451,18 @@ if __name__ == "__main__":
         console.setLevel(logging.ERROR)
         logging.getLogger('').addHandler(console)
         
-        flick = Uploadr()
+        flickr = Uploadr()
+        if ( not flickr.checkToken() ):
+            flickr.authenticate()
+            
 
-        images = flick.grabNewImages()
+        images = flickr.grabNewImages()
         #this is just double checking if everything is on Flickr what is in the history file
 	# in another words it will restore history file if deleted by comparing flickr with folders
         flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
 
 	#uploads all images that are in folders and not in history file        
-        flick.upload()  #uploads all new images to flickr
+        flickr.upload()  #uploads all new images to flickr
 
         
         #this will organize uploaded files into sets with the names according to tags
