@@ -3,6 +3,7 @@
 
 __author__ = "pkolarov@gmail.com"
 
+import dbhash,anydbm
 import sys, os, shelve, logging,string
 import flickr
 

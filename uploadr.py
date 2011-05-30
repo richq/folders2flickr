@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import dbhash,anydbm
 import sys, time, os, urllib2, shelve, string, logging, flickr, re
 import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, flickr2history, tags2set, deleteAll
 from ConfigParser import *

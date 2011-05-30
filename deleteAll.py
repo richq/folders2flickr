@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import dbhash,anydbm
 import sys, os, shelve, logging,string
 from ConfigParser import *
 import flickr
