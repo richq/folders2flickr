@@ -662,7 +662,7 @@ def photos_search_pages(user_id='', auth=False,  tags='', tag_mode='', text='',\
                   max_taken_date=max_taken_date, \
                   license=license, per_page=per_page,\
                   page=page, sort=sort)
-	
+    
     return data.rsp.photos.pages
 	
 	
@@ -863,8 +863,8 @@ def _dopost(method, auth=False, **params):
           (API_KEY, method, urlencode(params))
 
     #another useful debug print statement
-    print url
-    print payload
+    #print url
+    #print payload
 #    ret = urlopen(url, payload).read()
 #    print ret
     return _get_data(minidom.parse(urlopen(url, payload)))

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import shelve,dbhash,anydbm
-import sys, time, os, urllib2,  string, logging, flickr, re
-import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, flickr2history, tags2set
+import sys, time, os, urllib2, shelve, string, logging, flickr, re
+import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, flickr2history, tags2set, deleteAll
 from ConfigParser import *
 
 #
@@ -295,8 +294,8 @@ class Uploadr:
             (dirpath, dirnames, filenames) = data
             for f in filenames :
                 ext = f.lower().split(".")[-1]
-                if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov" or ext == "wmw" or ext == "mpeg" or ext == "mp4" or ext == "m2p" or ext == "3gp" or ext == "m2ts"):
-                  images.append( os.path.normpath( dirpath + "/" + f ) )
+                if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov"):
+                    images.append( os.path.normpath( dirpath + "/" + f ) )
         images.sort()
         return images
 
@@ -454,7 +453,12 @@ if __name__ == "__main__":
         flickr = Uploadr()
         if ( not flickr.checkToken() ):
             flickr.authenticate()
-            
+
+        #see if we need to wipe flickr account first
+     
+        if(configdict.defaults()['remove_all_pics_first'].startswith('true')):
+            deleteAll.deleteAllPics()
+            os._exit(1) ## STOP HERE after deleting all media so user has chance to turn off switch before next start
 
         images = flickr.grabNewImages()
         #this is just double checking if everything is on Flickr what is in the history file

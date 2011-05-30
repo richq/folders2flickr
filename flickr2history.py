@@ -3,8 +3,7 @@
 
 __author__ = "pkolarov@gmail.com"
 
-import shelve,dbhash,anydbm
-import sys, os, logging,string
+import sys, os, shelve, logging,string
 import flickr
 
 user = None
@@ -26,23 +25,23 @@ def getPhotoIDbyTag(tag):
                 photos = flickr.photos_search(user_id=user.id, auth=all, tags=tag,tag_mode='any')
                 break
         except:
-                logging.error("Flickr error while searching ....retrying")
+                logging.error("flickr2history: Flickr error while searching ....retrying")
                 logging.error(sys.exc_info()[0])
                 
         retries = retries + 1
         
     if (not photos or len(photos) == 0):
-        logging.error("No image in Flickr with tags %s (possibly deleted in Flickr by user)" % tag)
+        logging.debug("flickr2history: No image in Flickr (yet) with tags %s (possibly deleted in Flickr by user)" % tag)
         return None
     
-    logging.debug("Tag=%s found %d" % (tag, len(photos)))
+    logging.debug("flickr2history: Tag=%s found %d" % (tag, len(photos)))
     while (len(photos)>1):
-        logging.debug( "Tag %s matches %d images!" % (tag, len(photos)))
-        logging.debug("Removing other images")
+        logging.debug( "flickr2history :Tag %s matches %d images!" % (tag, len(photos)))
+        logging.debug("flickr2history: Removing other images")
         try:
             photos.pop().delete()
         except:
-            logging.error("Flickr error while deleting image")
+            logging.error("flickr2history: Flickr error while deleting duplicate image")
             logging.error(sys.exc_info()[0])
    
     return photos[0]
@@ -51,7 +50,7 @@ def getPhotoIDbyTag(tag):
 #find it on Flickr
 def reshelf(images,  imageDir, historyFile):
      
-     logging.debug('Started flickr2history')
+     logging.debug('flickr2history: Started flickr2history')
      try:
          global user
          user = flickr.test_login()
@@ -71,7 +70,7 @@ def reshelf(images,  imageDir, historyFile):
                   if(not photo):
                        uploaded.close()  # flush the DB file
                        continue
-                  logging.debug("Reregistering %s photo in local history file" % image)
+                  logging.debug("flickr2history: Reregistering %s photo in local history file" % image)
                   uploaded[ str(image)] = str(photo.id)
                   uploaded[ str(photo.id) ] =str(image)
                   uploaded.close()
