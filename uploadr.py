@@ -278,17 +278,20 @@ class Uploadr:
             return False
 
 
-    def upload( self ):
-        print HISTORY_FILE
+    def upload( self, newImages ):
         self.uploaded = shelve.open( HISTORY_FILE )
-        newImages = self.grabNewImages()
-
+        reallyUploaded = []
         for image in newImages:
-            self.uploadImage( image )
+            up = self.uploadImage( image )
+            if up:
+                reallyUploaded.append(up)
+        return reallyUploaded
 
 
-#get all images in folders and subfolders which match extensions below
     def grabNewImages( self ):
+        """
+        get all images in folders and subfolders which match extensions below
+        """
         images = []
         foo = os.walk( IMAGE_DIR )
         for data in foo:
@@ -303,61 +306,64 @@ class Uploadr:
 
     def uploadImage( self, image ):
         folderTag = image[len(IMAGE_DIR):]
-        #print folderTag
-        #return
-        if ( not self.uploaded.has_key( folderTag ) ):
 
-            try:
-                logging.debug( "Getting EXIF for %s" % image)
-                f = open(image, 'rb')
-                exiftags = exif.process_file(f)
-                f.close()
-                #print exiftags[XPKEYWORDS]
+        if self.uploaded.has_key(folderTag):
+            return None
+
+        try:
+            logging.debug( "Getting EXIF for %s" % image)
+            f = open(image, 'rb')
+            exiftags = exif.process_file(f)
+            f.close()
+            #print exiftags[XPKEYWORDS]
+            #print folderTag
+            # make one tag equal to original file path with spaces replaced by
+            # # and start it with # (for easier recognition) since space is
+            # used as TAG separator by flickr
+
+            # this is needed for later syncing flickr with folders
+            realTags  = os.path.dirname(folderTag).replace('\\',' ')   # look for / or \ or _ or .  and replace them with SPACE to make real Tags
+            realTags =  realTags.replace('/',' ')   # these will be the real tags ripped from folders
+            realTags =  realTags.replace('_',' ')
+            realTags =  realTags.replace('.',' ')
+            realTags = realTags.strip()
+            picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
+
+            if exiftags == {}:
+                logging.debug( 'NO_EXIF_HEADER for %s' % image)
+            else:
+                if XPKEYWORDS in exiftags:  #look for additional tags in EXIF to tag picture with
+                    if len(exiftags[XPKEYWORDS].printable) > 4:
+                        picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
+
+            picTags = picTags.strip()
+            logging.debug( "Uploading image %s with tags %s" % (image, picTags))
+            photo = ('photo', image, open(image,'rb').read())
 
 
-                #print folderTag
-                #make one tag equal to original file path with spaces replaced by # and start it with # (for easier recognition) since space is used as TAG separator by flickr
-                # this is needed for later syncing flickr with folders
-                realTags  = folderTag.replace('\\',' ')   # look for / or \ or _ or .  and replace them with SPACE to make real Tags
-                realTags =  realTags.replace('/',' ')   # these will be the real tags ripped from folders
-                realTags =  realTags.replace('_',' ')
-                realTags =  realTags.replace('.',' ')
-                picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
-
-                if exiftags == {}:
-                    logging.debug( 'NO_EXIF_HEADER for %s' % image)
-                else:
-                    if XPKEYWORDS in exiftags:  #look for additional tags in EXIF to tag picture with
-                        if len(exiftags[XPKEYWORDS].printable) > 4:
-                            picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
-
-                #print picTags
-                logging.debug( "Uploading image %s" % image)
-                photo = ('photo', image, open(image,'rb').read())
-
-
-                d = {
-                    api.token   : str(self.token),
-                    api.perms   : str(self.perms),
-                    "tags"      : str(picTags),
-                    "is_public" : str( FLICKR["is_public"] ),
-                    "is_friend" : str( FLICKR["is_friend"] ),
-                    "is_family" : str( FLICKR["is_family"] )
-                }
-                sig = self.signCall( d )
-                d[ api.sig ] = sig
-                d[ api.key ] = FLICKR[ api.key ]
-                url = self.build_request(api.upload, d, (photo,))
-                xml = urllib2.urlopen( url ).read()
-                res = xmltramp.parse(xml)
-                if ( self.isGood( res ) ):
-                    logging.debug( "successful.")
-                    self.logUpload( res.photoid, folderTag )
-                else :
-                    print "problem.."
-                    self.reportError( res )
-            except:
-                logging.error(sys.exc_info())
+            d = {
+                api.token   : str(self.token),
+                api.perms   : str(self.perms),
+                "tags"      : str(picTags),
+                "is_public" : str( FLICKR["is_public"] ),
+                "is_friend" : str( FLICKR["is_friend"] ),
+                "is_family" : str( FLICKR["is_family"] )
+            }
+            sig = self.signCall( d )
+            d[ api.sig ] = sig
+            d[ api.key ] = FLICKR[ api.key ]
+            url = self.build_request(api.upload, d, (photo,))
+            xml = urllib2.urlopen( url ).read()
+            res = xmltramp.parse(xml)
+            if ( self.isGood( res ) ):
+                logging.debug( "successful.")
+                self.logUpload( res.photoid, folderTag )
+                return res.photoid
+            else :
+                print "problem.."
+                self.reportError( res )
+        except:
+            logging.error(sys.exc_info())
 
 
     def logUpload( self, photoID, imageName ):
@@ -462,8 +468,9 @@ if __name__ == "__main__":
     flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
 
     #uploads all images that are in folders and not in history file
-    flickr.upload()  #uploads all new images to flickr
-
-
-    #this will organize uploaded files into sets with the names according to tags
-    tags2set.createSets( HISTORY_FILE)
+    uploaded = flickr.upload(images)  #uploads all new images to flickr
+    if len(uploaded) == 0:
+        logging.debug("Nothing uploaded, all done")
+    else:
+        #this will organize uploaded files into sets with the names according to tags
+        tags2set.createSets( HISTORY_FILE)
