@@ -22,12 +22,12 @@ def getPhotoIDbyTag(tag):
     photos = None
     while (retries < 3):
         try:
-                logging.debug(user.id)
-                photos = flickr.photos_search(user_id=user.id, auth=all, tags=tag,tag_mode='any')
-                break
+            logging.debug(user.id)
+            photos = flickr.photos_search(user_id=user.id, auth=all, tags=tag,tag_mode='any')
+            break
         except:
-                logging.error("flickr2history: Flickr error while searching ....retrying")
-                logging.error(sys.exc_info()[0])
+            logging.error("flickr2history: Flickr error while searching ....retrying")
+            logging.error(sys.exc_info()[0])
 
         retries = retries + 1
 
@@ -51,28 +51,27 @@ def getPhotoIDbyTag(tag):
 #find it on Flickr
 def reshelf(images,  imageDir, historyFile):
 
-     logging.debug('flickr2history: Started flickr2history')
-     try:
-         global user
-         user = flickr.test_login()
-         logging.debug(user.id)
-     except:
-         logging.error(sys.exc_info()[0])
-         return None
+    logging.debug('flickr2history: Started flickr2history')
+    try:
+        global user
+        user = flickr.test_login()
+        logging.debug(user.id)
+    except:
+        logging.error(sys.exc_info()[0])
+        return None
 
-     for image in images:
+    for image in images:
         image = image[len(imageDir):] #remove absolute directory
         uploaded = shelve.open( historyFile )   #its better to always reopen this file
         if ( not uploaded.has_key(str(image) ) ):
-                  #each picture should have one id tag in the folder format with spaces replaced by # and starting with #
-                  flickrtag = '#' + image.replace(' ','#')
-                  photo = getPhotoIDbyTag(flickrtag)
-                  logging.debug(image)
-                  if(not photo):
-                       uploaded.close()  # flush the DB file
-                       continue
-                  logging.debug("flickr2history: Reregistering %s photo in local history file" % image)
-                  uploaded[ str(image)] = str(photo.id)
-                  uploaded[ str(photo.id) ] =str(image)
-                  uploaded.close()
-
+            #each picture should have one id tag in the folder format with spaces replaced by # and starting with #
+            flickrtag = '#' + image.replace(' ','#')
+            photo = getPhotoIDbyTag(flickrtag)
+            logging.debug(image)
+            if(not photo):
+                uploaded.close()  # flush the DB file
+                continue
+            logging.debug("flickr2history: Reregistering %s photo in local history file" % image)
+            uploaded[ str(image)] = str(photo.id)
+            uploaded[ str(photo.id) ] =str(image)
+            uploaded.close()

@@ -716,7 +716,7 @@ MAKERNOTE_OLYMPUS_TAGS={
         1: 'Yes'}),
     0x1027: ('ExternalFlashZoom', ),
     0x1028: ('ExternalFlashMode', ),
-    0x1029: ('Contrast 	int16u',
+    0x1029: ('Contrast  int16u',
        {0: 'High',
         1: 'Normal',
         2: 'Low'}),
@@ -1769,4 +1769,3 @@ if __name__ == '__main__':
         if 'JPEGThumbnail' in data:
             print 'File has JPEG thumbnail'
         print
-

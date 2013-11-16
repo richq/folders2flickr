@@ -801,14 +801,14 @@ def contacts_getPublicList(user_id):
     data = _doget(method, auth=False, user_id=user_id)
 
     try:
-      if isinstance(data.rsp.contacts.contact, list):
-          return [User(user.nsid, username=user.username) \
-                  for user in data.rsp.contacts.contact]
+        if isinstance(data.rsp.contacts.contact, list):
+            return [User(user.nsid, username=user.username) \
+                    for user in data.rsp.contacts.contact]
 
     except AttributeError:
-      return "No users in the list"
+        return "No users in the list"
     except:
-      return "Unknown error"
+        return "Unknown error"
 
 #   else:
 #       user = data.rsp.contacts.contact

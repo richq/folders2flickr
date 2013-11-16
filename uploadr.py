@@ -89,7 +89,7 @@ class APIConstants:
     method = "method"
 
     def __init__( self ):
-       pass
+        pass
 
 api = APIConstants()
 
@@ -325,11 +325,11 @@ class Uploadr:
                 picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
 
                 if exiftags == {}:
-                   logging.debug( 'NO_EXIF_HEADER for %s' % image)
+                    logging.debug( 'NO_EXIF_HEADER for %s' % image)
                 else:
-                   if XPKEYWORDS in exiftags:  #look for additional tags in EXIF to tag picture with
-                            if len(exiftags[XPKEYWORDS].printable) > 4:
-                                picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
+                    if XPKEYWORDS in exiftags:  #look for additional tags in EXIF to tag picture with
+                        if len(exiftags[XPKEYWORDS].printable) > 4:
+                            picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
 
                 #print picTags
                 logging.debug( "Uploading image %s" % image)
@@ -442,33 +442,33 @@ class Uploadr:
 
 
 if __name__ == "__main__":
-        logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='debug.log',
-                    filemode='w')
-        logging.debug('Started')
-        console = logging.FileHandler('error.log')
-        console.setLevel(logging.ERROR)
-        logging.getLogger('').addHandler(console)
+    logging.basicConfig(level=logging.DEBUG,
+                format='%(asctime)s %(levelname)s %(message)s',
+                filename='debug.log',
+                filemode='w')
+    logging.debug('Started')
+    console = logging.FileHandler('error.log')
+    console.setLevel(logging.ERROR)
+    logging.getLogger('').addHandler(console)
 
-        flickr = Uploadr()
-        if ( not flickr.checkToken() ):
-            flickr.authenticate()
+    flickr = Uploadr()
+    if ( not flickr.checkToken() ):
+        flickr.authenticate()
 
-        #see if we need to wipe flickr account first
+    #see if we need to wipe flickr account first
 
-        if(configdict.defaults()['remove_all_pics_first'].startswith('true')):
-            deleteAll.deleteAllPics()
-            os._exit(1) ## STOP HERE after deleting all media so user has chance to turn off switch before next start
+    if(configdict.defaults()['remove_all_pics_first'].startswith('true')):
+        deleteAll.deleteAllPics()
+        os._exit(1) ## STOP HERE after deleting all media so user has chance to turn off switch before next start
 
-        images = flickr.grabNewImages()
-        #this is just double checking if everything is on Flickr what is in the history file
-	# in another words it will restore history file if deleted by comparing flickr with folders
-        flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
+    images = flickr.grabNewImages()
+    #this is just double checking if everything is on Flickr what is in the history file
+    # in another words it will restore history file if deleted by comparing flickr with folders
+    flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
 
-	#uploads all images that are in folders and not in history file
-        flickr.upload()  #uploads all new images to flickr
+    #uploads all images that are in folders and not in history file
+    flickr.upload()  #uploads all new images to flickr
 
 
-        #this will organize uploaded files into sets with the names according to tags
-        tags2set.createSets( HISTORY_FILE)
+    #this will organize uploaded files into sets with the names according to tags
+    tags2set.createSets( HISTORY_FILE)
