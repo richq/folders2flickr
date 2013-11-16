@@ -456,6 +456,7 @@ if __name__ == "__main__":
         flickr.authenticate()
 
     images = flickr.grabNewImages()
+    logging.debug("Uploading images: %s"  % (str(images)))
     #this is just double checking if everything is on Flickr what is in the history file
     # in another words it will restore history file if deleted by comparing flickr with folders
     flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
