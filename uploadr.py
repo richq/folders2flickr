@@ -30,8 +30,7 @@ from ConfigParser import *
 #
 
 configdict = ConfigParser()
-configdict.read('uploadr.ini')
-
+configdict.read(os.path.expanduser('~/.uploadr.ini'))
 
 
 #

@@ -8,7 +8,7 @@ import flickr
 existingSets = None
 user = None
 configdict = ConfigParser()
-configdict.read('uploadr.ini')
+configdict.read(os.path.expanduser('~/.uploadr.ini'))
 onlySubs = configdict.defaults()['only_sub_sets'] #set to true if Sets should be called only by the name of the last subfolder
 
 def  creatSet(photoSet, setName):
