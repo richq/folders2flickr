@@ -455,12 +455,6 @@ if __name__ == "__main__":
     if ( not flickr.checkToken() ):
         flickr.authenticate()
 
-    #see if we need to wipe flickr account first
-
-    if(configdict.defaults()['remove_all_pics_first'].startswith('true')):
-        deleteAll.deleteAllPics()
-        os._exit(1) ## STOP HERE after deleting all media so user has chance to turn off switch before next start
-
     images = flickr.grabNewImages()
     #this is just double checking if everything is on Flickr what is in the history file
     # in another words it will restore history file if deleted by comparing flickr with folders
