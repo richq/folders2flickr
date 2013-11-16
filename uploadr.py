@@ -25,7 +25,7 @@ from ConfigParser import *
 #
 #   You may use this code however you see fit in any form whatsoever.
 #
-#   2009 Peter Kolarov  -  Updated with fixes and new functionality 
+#   2009 Peter Kolarov  -  Updated with fixes and new functionality
 #
 #
 
@@ -67,7 +67,7 @@ XPKEYWORDS = 'Image XPKeywords'
 FLICKR["secret" ] = "13c314caee8b1f31"
 FLICKR["api_key" ] = "91dfde3ed605f6b8b9d9c38886547dcf"
 flickr.API_KEY = FLICKR["api_key" ]
-flickr.API_SECRET =FLICKR["secret" ] 
+flickr.API_SECRET =FLICKR["secret" ]
 flickr.tokenFile= ".flickrToken"
 flickr.AUTH = True
 
@@ -282,10 +282,10 @@ class Uploadr:
         print HISTORY_FILE
         self.uploaded = shelve.open( HISTORY_FILE )
         newImages = self.grabNewImages()
-        
+
         for image in newImages:
             self.uploadImage( image )
-        
+
 
 #get all images in folders and subfolders which match extensions below
     def grabNewImages( self ):
@@ -314,14 +314,14 @@ class Uploadr:
                 f.close()
                 #print exiftags[XPKEYWORDS]
 
-                
+
                 #print folderTag
                 #make one tag equal to original file path with spaces replaced by # and start it with # (for easier recognition) since space is used as TAG separator by flickr
-                # this is needed for later syncing flickr with folders 
-                realTags  = folderTag.replace('\\',' ')   # look for / or \ or _ or .  and replace them with SPACE to make real Tags 
+                # this is needed for later syncing flickr with folders
+                realTags  = folderTag.replace('\\',' ')   # look for / or \ or _ or .  and replace them with SPACE to make real Tags
                 realTags =  realTags.replace('/',' ')   # these will be the real tags ripped from folders
                 realTags =  realTags.replace('_',' ')
-                realTags =  realTags.replace('.',' ')  
+                realTags =  realTags.replace('.',' ')
                 picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
 
                 if exiftags == {}:
@@ -330,7 +330,7 @@ class Uploadr:
                    if XPKEYWORDS in exiftags:  #look for additional tags in EXIF to tag picture with
                             if len(exiftags[XPKEYWORDS].printable) > 4:
                                 picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
-                
+
                 #print picTags
                 logging.debug( "Uploading image %s" % image)
                 photo = ('photo', image, open(image,'rb').read())
@@ -361,7 +361,7 @@ class Uploadr:
 
 
     def logUpload( self, photoID, imageName ):
-        
+
         photoID = str( photoID )
         imageName = str( imageName )
         self.uploaded[ imageName ] = photoID
@@ -450,13 +450,13 @@ if __name__ == "__main__":
         console = logging.FileHandler('error.log')
         console.setLevel(logging.ERROR)
         logging.getLogger('').addHandler(console)
-        
+
         flickr = Uploadr()
         if ( not flickr.checkToken() ):
             flickr.authenticate()
 
         #see if we need to wipe flickr account first
-     
+
         if(configdict.defaults()['remove_all_pics_first'].startswith('true')):
             deleteAll.deleteAllPics()
             os._exit(1) ## STOP HERE after deleting all media so user has chance to turn off switch before next start
@@ -466,9 +466,9 @@ if __name__ == "__main__":
 	# in another words it will restore history file if deleted by comparing flickr with folders
         flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
 
-	#uploads all images that are in folders and not in history file        
+	#uploads all images that are in folders and not in history file
         flickr.upload()  #uploads all new images to flickr
 
-        
+
         #this will organize uploaded files into sets with the names according to tags
         tags2set.createSets( HISTORY_FILE)

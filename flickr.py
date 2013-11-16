@@ -60,10 +60,10 @@ class FlickrError(Exception): pass
 class Photo(object):
     """Represents a Flickr Photo."""
 
-    __readonly = ['id', 'secret', 'server', 'isfavorite', 'license', 'rotation', 
-                  'owner', 'dateposted', 'datetaken', 'takengranularity', 
-                  'title', 'description', 'ispublic', 'isfriend', 'isfamily', 
-                  'cancomment', 'canaddmeta', 'comments', 'tags', 'permcomment', 
+    __readonly = ['id', 'secret', 'server', 'isfavorite', 'license', 'rotation',
+                  'owner', 'dateposted', 'datetaken', 'takengranularity',
+                  'title', 'description', 'ispublic', 'isfriend', 'isfamily',
+                  'cancomment', 'canaddmeta', 'comments', 'tags', 'permcomment',
                   'permaddmeta']
 
     #XXX: Hopefully None won't cause problems
@@ -91,13 +91,13 @@ class Photo(object):
         self.__server = server
         self.__tags = tags
         self.__title = title
-        
+
         self.__dateposted = None
         self.__datetaken = None
         self.__takengranularity = None
         self.__permcomment = None
         self.__permaddmeta = None
-    
+
     def __setattr__(self, key, value):
         if key in self.__class__.__readonly:
             raise AttributeError("The attribute %s is read-only." % key)
@@ -115,10 +115,10 @@ class Photo(object):
     def _load_properties(self):
         """Loads the properties from Flickr."""
         self.__loaded = True
-        
+
         method = 'flickr.photos.getInfo'
         data = _doget(method, photo_id=self.id)
-        
+
         photo = data.rsp.photo
 
         self.__secret = photo.secret
@@ -126,7 +126,7 @@ class Photo(object):
         self.__isfavorite = photo.isfavorite
         self.__license = photo.license
         self.__rotation = photo.rotation
-        
+
 
 
         owner = photo.owner
@@ -143,7 +143,7 @@ class Photo(object):
         self.__dateposted = photo.dates.posted
         self.__datetaken = photo.dates.taken
         self.__takengranularity = photo.dates.takengranularity
-        
+
         self.__cancomment = photo.editability.cancomment
         self.__canaddmeta = photo.editability.canaddmeta
         self.__comments = photo.comments.text
@@ -167,7 +167,7 @@ class Photo(object):
 
     def __str__(self):
         return '<Flickr Photo %s>' % self.id
-    
+
 
     def setTags(self, tags):
         """Set the tags for current photo to list tags.
@@ -183,9 +183,9 @@ class Photo(object):
         (flickr.photos.delete)
         """
         method = 'flickr.photos.delete'
-       
+
         _dopost(method, auth=True, photo_id=self.id)
-        
+
 
     def addTags(self, tags):
         """Adds the list of tags to current tags. (flickr.photos.addtags)
@@ -220,14 +220,14 @@ class Photo(object):
             title = self.title
         if description is None:
             description = self.description
-            
+
         _dopost(method, auth=True, title=title, \
                description=description, photo_id=self.id)
-        
+
         self.__title = title
         self.__description = description
 
-    
+
     def getURL(self, size='Medium', urlType='url'):
         """Retrieves a url for the photo.  (flickr.photos.getSizes)
 
@@ -252,7 +252,7 @@ class Photo(object):
         data = _doget(method, photo_id=self.id)
         ret = []
         # The given props are those that we return and the according types, since
-        # return width and height as string would make "75">"100" be True, which 
+        # return width and height as string would make "75">"100" be True, which
         # is just error prone.
         props = {'url':str,'width':int,'height':int,'label':str,'source':str,'text':str}
         for psize in data.rsp.sizes.size:
@@ -261,7 +261,7 @@ class Photo(object):
                 d[prop] = convert_to_type(getattr(psize, prop))
             ret.append(d)
         return ret
-    
+
     #def getExif(self):
         #method = 'flickr.photos.getExif'
         #data = _doget(method, photo_id=self.id)
@@ -271,7 +271,7 @@ class Photo(object):
             ##ret.append({exif.label:exif.})
         #return ret
         ##raise FlickrError, "No URL found"
-        
+
     def getLocation(self):
         """
         Return the latitude+longitutde of the picture.
@@ -284,8 +284,8 @@ class Photo(object):
             return None
         loc = data.rsp.photo.location
         return [loc.latitude, loc.longitude]
-        
-        
+
+
     def getComments(self) :
         """"
         get list of comments for photo
@@ -298,9 +298,9 @@ class Photo(object):
         except FlickrError: # ???? what errors might there be????
             return None
         return data.rsp.comments
-            
-    
-                
+
+
+
 class Photoset(object):
     """A Flickr photoset."""
 
@@ -313,7 +313,7 @@ class Photoset(object):
         self.__count = photos
         self.__secret = secret
         self.__server = server
-        
+
     id = property(lambda self: self.__id)
     title = property(lambda self: self.__title)
     description = property(lambda self: self.__description)
@@ -324,7 +324,7 @@ class Photoset(object):
 
     def __str__(self):
         return '<Flickr Photoset %s>' % self.id
-    
+
     def getPhotos(self):
         """Returns list of Photos."""
         method = 'flickr.photosets.getPhotos'
@@ -334,7 +334,7 @@ class Photoset(object):
         for photo in photos:
             p.append(Photo(photo.id, title=photo.title, secret=photo.secret, \
                            server=photo.server))
-        return p    
+        return p
 
     def editPhotos(self, photos, primary=None):
         """Edit the photos in this set.
@@ -346,7 +346,7 @@ class Photoset(object):
 
         if primary is None:
             primary = self.primary
-            
+
         ids = [photo.id for photo in photos]
         if primary.id not in ids:
             ids.append(primary.id)
@@ -379,7 +379,7 @@ class Photoset(object):
         _dopost(method, auth=True, photoset_id=self.id, photo_id=photo.id)
         self.__count = self.__count - 1
         return True
-        
+
     def editMeta(self, title=None, description=None):
         """Set metadata for photo. (flickr.photos.setMeta)"""
         method = 'flickr.photosets.editMeta'
@@ -388,10 +388,10 @@ class Photoset(object):
             title = self.title
         if description is None:
             description = self.description
-            
+
         _dopost(method, auth=True, title=title, \
                description=description, photoset_id=self.id)
-        
+
         self.__title = title
         self.__description = description
         return True
@@ -412,18 +412,18 @@ class Photoset(object):
         """
         if not isinstance(photo, Photo):
             raise TypeError, "Photo expected"
-        
+
         method = 'flickr.photosets.create'
         data = _dopost(method, auth=True, title=title,\
                        description=description,\
                        primary_photo_id=photo.id)
-        
+
         set = Photoset(data.rsp.photoset.id, title, Photo(photo.id),
                        photos=1, description=description)
         return set
     create = classmethod(create)
-                      
-        
+
+
 class User(object):
     """A Flickr user."""
 
@@ -456,21 +456,21 @@ class User(object):
                             self._general_getattr('photos_count'))
     icon_server= property(lambda self: self._general_getattr('icon_server'))
     icon_url= property(lambda self: self._general_getattr('icon_url'))
- 
+
     def _general_getattr(self, var):
         """Generic get attribute function."""
         if getattr(self, "_%s__%s" % (self.__class__.__name__, var)) is None \
            and not self.__loaded:
             self._load_properties()
         return getattr(self, "_%s__%s" % (self.__class__.__name__, var))
-            
+
     def _load_properties(self):
         """Load User properties from Flickr."""
         method = 'flickr.people.getInfo'
         data = _doget(method, user_id=self.__id)
 
         self.__loaded = True
-        
+
         person = data.rsp.person
 
         self.__isadmin = person.isadmin
@@ -481,7 +481,7 @@ class User(object):
                               % (person.iconserver, self.__id)
         else:
             self.__icon_url = 'http://www.flickr.com/images/buddyicon.jpg'
-        
+
         self.__username = person.username.text
         self.__realname = getattr((getattr(person,  'realname',  u'')), 'text', u'')
         self.__location = getattr((getattr(person,  'location',  u'')), 'text', u'')
@@ -495,12 +495,12 @@ class User(object):
 
     def __str__(self):
         return '<Flickr User %s>' % self.id
-    
+
     def getPhotosets(self):
         """Returns a list of Photosets."""
         method = 'flickr.photosets.getList'
         data = _doget(method, user_id=self.id)
-        
+
         sets = []
         if not getattr(data.rsp.photosets,  'photoset',None):
             return sets        #N.B. returns an empty set
@@ -566,7 +566,7 @@ class Group(object):
         data = _doget(method, group_id=self.id)
 
         self.__loaded = True
-        
+
         group = data.rsp.group
 
         self.__name = photo.name.text
@@ -578,7 +578,7 @@ class Group(object):
 
     def __str__(self):
         return '<Flickr Group %s>' % self.id
-    
+
     def getPhotos(self, tags='', per_page='', page=''):
         """Get a list of photo objects for this group"""
         method = 'flickr.groups.pools.getPhotos'
@@ -600,7 +600,7 @@ class Group(object):
         method = 'flickr.groups.pools.remove'
         _dopost(method, auth=True, photo_id=photo.id, group_id=self.id)
         return True
-    
+
 class Tag(object):
     def __init__(self, id, author, raw, text):
         self.id = id
@@ -611,7 +611,7 @@ class Tag(object):
     def __str__(self):
         return '<Flickr Tag %s (%s)>' % (self.id, self.text)
 
-    
+
 #Flickr API methods
 #see api docs http://www.flickr.com/services/api/
 #for details of each param
@@ -652,7 +652,7 @@ def photos_search_pages(user_id='', auth=False,  tags='', tag_mode='', text='',\
                   license='', per_page='', page='', sort=''):
     """Returns the number of pages for the previous function (photos_search())
     """
-	
+
     method = 'flickr.photos.search'
 
     data = _doget(method, auth=auth, user_id=user_id, tags=tags, text=text,\
@@ -662,11 +662,11 @@ def photos_search_pages(user_id='', auth=False,  tags='', tag_mode='', text='',\
                   max_taken_date=max_taken_date, \
                   license=license, per_page=per_page,\
                   page=page, sort=sort)
-    
+
     return data.rsp.photos.pages
-	
-	
-	
+
+
+
 #XXX: Could be class method in User
 def people_findByEmail(email):
     """Returns User object."""
@@ -761,7 +761,7 @@ def groups_pools_getGroups():
         group = data.rsp.groups.group
         groups = [Group(group.id, name=group.name, privacy=group.privacy)]
     return groups
-    
+
 
 def tags_getListUser(user_id=''):
     """Returns a list of tags for the given user (in string format)"""
@@ -823,8 +823,8 @@ def interestingness():
             photos.append(_parse_photo(photo))
     else:
         photos = [_parse_photo(data.rsp.photos.photo)]
-    return photos    
-    
+    return photos
+
 def test_login():
     method = 'flickr.test.login'
     data = _doget(method, auth=True)
@@ -850,7 +850,7 @@ def _doget(method, auth=False, **params):
 
     #another useful debug print statement
     #print url
-    
+
     return _get_data(minidom.parse(urlopen(url)))
 
 def _dopost(method, auth=False, **params):
@@ -928,10 +928,10 @@ def _get_auth_url_suffix(method, auth, params):
         if item == 'auth_token':
             api_string.append('auth_token')
             api_string.append(token)
-                
+
     api_signature = hashlib.md5(''.join(api_string)).hexdigest()
-    
-    return '&auth_token=%s&api_sig=%s' % (token, api_signature) 
+
+    return '&auth_token=%s&api_sig=%s' % (token, api_signature)
 
 def _parse_photo(photo):
     """Create a Photo object from photo data."""
@@ -944,7 +944,7 @@ def _parse_photo(photo):
     server = photo.server
     p = Photo(photo.id, owner=owner, title=title, ispublic=ispublic,\
               isfriend=isfriend, isfamily=isfamily, secret=secret, \
-              server=server)        
+              server=server)
     return p
 
 #stolen methods
@@ -958,7 +958,7 @@ def unmarshal(element):
     if isinstance(element, minidom.Element):
         for key in element.attributes.keys():
             setattr(rc, key, element.attributes[key].value)
-            
+
     childElements = [e for e in element.childNodes \
                      if isinstance(e, minidom.Element)]
     if childElements:
@@ -999,16 +999,16 @@ class Blogs():
     def getList(self,auth=True):
         """blogs.getList requires READ authentication"""
         # please read documentation on how to use this
-        
+
         method = 'flickr.blogs.getList'
         if auth==True : data = _doget(method, auth=True)
         if not auth==True : data = _doget(method, auth=False)
-        
+
         bID = []
         bName = []
         bNeedsPword = []
         bURL = []
-        
+
         try:
             for plog in data.rsp.blogs.blog:
                 bID.append(plog.id)
@@ -1027,7 +1027,7 @@ class Blogs():
                 return "Unknown error!"
         except AttributeError:
             return "There are no blogs!"
-		
+
         myReturn = [bID,bName,bNeedsPword,bURL]
         return myReturn
 
@@ -1066,13 +1066,13 @@ class Auth():
         method = 'flickr.auth.getToken'
         sig_str = API_SECRET + 'api_key' + API_KEY + 'frob' + frob + 'method' + method
         signature_hash = hashlib.md5(sig_str).hexdigest()
-        data = _doget(method, auth=False, api_sig=signature_hash, 
+        data = _doget(method, auth=False, api_sig=signature_hash,
                       api_key=API_KEY, frob=frob)
         return data.rsp.auth.token.text
 
 def userToken():
     # This method allows you flickr.py to retrive the saved token
-    # as once the token for a program has been got from flickr, 
+    # as once the token for a program has been got from flickr,
     # it cannot be got again, so flickr.py saves it in a file
     # called token.txt (default) somewhere.
     if not tokenPath == '':

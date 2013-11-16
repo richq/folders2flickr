@@ -16,8 +16,8 @@ user = None
 #
 #Plus delete images that contain the same TAGS !!!!
 def getPhotoIDbyTag(tag):
-  
-    
+
+
     retries = 0
     photos = None
     while (retries < 3):
@@ -28,13 +28,13 @@ def getPhotoIDbyTag(tag):
         except:
                 logging.error("flickr2history: Flickr error while searching ....retrying")
                 logging.error(sys.exc_info()[0])
-                
+
         retries = retries + 1
-        
+
     if (not photos or len(photos) == 0):
         logging.debug("flickr2history: No image in Flickr (yet) with tags %s (possibly deleted in Flickr by user)" % tag)
         return None
-    
+
     logging.debug("flickr2history: Tag=%s found %d" % (tag, len(photos)))
     while (len(photos)>1):
         logging.debug( "flickr2history :Tag %s matches %d images!" % (tag, len(photos)))
@@ -44,13 +44,13 @@ def getPhotoIDbyTag(tag):
         except:
             logging.error("flickr2history: Flickr error while deleting duplicate image")
             logging.error(sys.exc_info()[0])
-   
+
     return photos[0]
 
 #store image reference in the history file if its not there yet and if we actually can
 #find it on Flickr
 def reshelf(images,  imageDir, historyFile):
-     
+
      logging.debug('flickr2history: Started flickr2history')
      try:
          global user
@@ -59,7 +59,7 @@ def reshelf(images,  imageDir, historyFile):
      except:
          logging.error(sys.exc_info()[0])
          return None
-        
+
      for image in images:
         image = image[len(imageDir):] #remove absolute directory
         uploaded = shelve.open( historyFile )   #its better to always reopen this file
@@ -75,4 +75,4 @@ def reshelf(images,  imageDir, historyFile):
                   uploaded[ str(image)] = str(photo.id)
                   uploaded[ str(photo.id) ] =str(image)
                   uploaded.close()
-    
+

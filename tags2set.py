@@ -20,14 +20,14 @@ def  creatSet(photoSet, setName):
             photos.append(flickr.Photo(id = p))
 
     fset = None
-    #check if set with the name exists already 
+    #check if set with the name exists already
     for s in existingSets:
             if(s.title == setName):
                     fset= s
                     logging.debug('tags2set: Found existing set %s' % setName)
                    # return
                     break
-    try:                  
+    try:
         if(fset == None):
                 #print photos[0]
                 #print setName
@@ -37,13 +37,13 @@ def  creatSet(photoSet, setName):
         logging.error('tags2set: Cannot create set %s' % setName)
         logging.error(sys.exc_info()[0])
 
-    try:    
+    try:
         fset.editPhotos(photos)
     except:
         logging.error('tags2set: Cannot edit set %s' % setName)
         logging.error(sys.exc_info()[0])
 
-        
+
     logging.debug('tags2set: ...added %d photos' % len(photos)  )
     return fset
 
@@ -51,7 +51,7 @@ def  creatSet(photoSet, setName):
 def createSets( historyFile):
      global existingSets
      global user
-    
+
      logging.debug('tags2set: Started tags2set')
      try:
          user = flickr.test_login()
@@ -60,7 +60,7 @@ def createSets( historyFile):
      except:
          logging.error(sys.exc_info()[0])
          return None
-     
+
      uploaded = shelve.open( historyFile )
      keys = uploaded.keys()
      keys.sort()
@@ -73,7 +73,7 @@ def createSets( historyFile):
                 head, setName = os.path.split(os.path.dirname(image))
             else:
                 setName = os.path.dirname(image) #set name is realy a directory
-                    
+
             if(not lastSetName == setName and not lastSetName == ''):
                 #new set is starting so save last
                 #logging.debug( "Creating set %s with %d pictures" % (lastSetName, len(photoSet)) )
@@ -82,10 +82,10 @@ def createSets( historyFile):
             logging.debug("tags2set: Adding image %s" % image)
             photoSet.append(uploaded.get(image))
             lastSetName = setName
-          
-                
+
+
      #dont forget to create last set
      #logging.debug( "Creating set %s with %d pictures" % (setName, len(photoSet)) )
      creatSet(photoSet, setName)
-     
+
 
