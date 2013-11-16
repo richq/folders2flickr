@@ -337,7 +337,8 @@ class Uploadr:
                         picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
 
             picTags = picTags.strip()
-            logging.debug( "Uploading image %s with tags %s" % (image, picTags))
+            msg = "Uploading image %s with tags %s" % (image, picTags)
+            print time.strftime('[%F %H:%M:%S]', time.localtime()), msg
             photo = ('photo', image, open(image,'rb').read())
 
 
