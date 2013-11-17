@@ -368,6 +368,7 @@ class Uploadr:
                 self.reportError( res )
         except KeyboardInterrupt, ex:
             logging.debug("Keyboard interrupt seen, abandon uploads")
+            print "Stopping uploads..."
             self.abandonUploads = True
             return None
         except:
