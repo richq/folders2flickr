@@ -1,0 +1,37 @@
+This software contains files from multiple authors.  Individual files are
+licensed as follows. My modifications are released under the same license as
+the original files.
+
+deleteAll.py
+flickr2history.py
+setup.py
+tags2set.py
+	Code license
+	GNU GPL v3
+	http://code.google.com/p/folders2flickr/
+
+flickr.py
+	Copyright 2004-2006 James Clarke <james@jamesclarke.info>
+	Portions Copyright 2007-2008 Joshua Henderson <joshhendo@gmail.com>
+
+	THIS SOFTWARE IS SUPPLIED WITHOUT WARRANTY OF ANY KIND, AND MAY BE
+	COPIED, MODIFIED OR DISTRIBUTED IN ANY WAY, AS LONG AS THIS NOTICE
+	AND ACKNOWLEDGEMENT OF AUTHORSHIP REMAIN.
+
+exif.py
+	# Library to extract EXIF information from digital camera image files
+	# http://sourceforge.net/projects/exif-py/
+	BSD License
+
+
+uploadr.py
+	#   Inspired by:
+	#        http://micampe.it/things/flickruploadr
+	#   You may use this code however you see fit in any form whatsoever.
+
+xmltramp.py
+	"""xmltramp: Make XML documents easily accessible."""
+	__version__ = "2.16"
+	__author__ = "Aaron Swartz"
+	__credits__ = "Many thanks to pjz, bitsko, and DanC."
+	__copyright__ = "(C) 2003 Aaron Swartz. GNU GPL 2."
