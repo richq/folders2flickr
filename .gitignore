@@ -1,0 +1,4 @@
+*.pyc
+/.flickrToken
+debug.log
+error.log
