@@ -99,8 +99,7 @@ class Uploadr:
 
     def __init__( self ):
         self.token = self.getCachedToken()
-
-
+        self.abandonUploads = False
 
     """
     Signs args via md5 per http://www.flickr.com/services/api/auth.spec.html (Section 8)
@@ -284,6 +283,9 @@ class Uploadr:
             up = self.uploadImage( image )
             if up:
                 reallyUploaded.append(up)
+            if self.abandonUploads:
+                # the idea here is ctrl-c in the middle will still create sets
+                break
         return reallyUploaded
 
 
@@ -337,7 +339,9 @@ class Uploadr:
 
             picTags = picTags.strip()
             msg = "Uploading image %s with tags %s" % (image, picTags)
-            print time.strftime('[%F %H:%M:%S]', time.localtime()), msg
+            timestamp = time.strftime('[%F %H:%M:%S]', time.localtime())
+            logging.debug(msg)
+            print timestamp, msg
             photo = ('photo', image, open(image,'rb').read())
 
 
@@ -362,8 +366,13 @@ class Uploadr:
             else :
                 print "problem.."
                 self.reportError( res )
+        except KeyboardInterrupt, ex:
+            logging.debug("Keyboard interrupt seen, abandon uploads")
+            self.abandonUploads = True
+            return None
         except:
             logging.error(sys.exc_info())
+        return None
 
 
     def logUpload( self, photoID, imageName ):
@@ -465,7 +474,8 @@ if __name__ == "__main__":
     logging.debug("Uploading images: %s"  % (str(images)))
     #this is just double checking if everything is on Flickr what is in the history file
     # in another words it will restore history file if deleted by comparing flickr with folders
-    flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
+    # this takes too frickin long
+    #flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
 
     #uploads all images that are in folders and not in history file
     uploaded = flickr.upload(images)  #uploads all new images to flickr

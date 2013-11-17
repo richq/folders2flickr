@@ -16,8 +16,6 @@ user = None
 #
 #Plus delete images that contain the same TAGS !!!!
 def getPhotoIDbyTag(tag):
-
-
     retries = 0
     photos = None
     while (retries < 3):
@@ -63,15 +61,16 @@ def reshelf(images,  imageDir, historyFile):
     for image in images:
         image = image[len(imageDir):] #remove absolute directory
         uploaded = shelve.open( historyFile )   #its better to always reopen this file
-        if ( not uploaded.has_key(str(image) ) ):
-            #each picture should have one id tag in the folder format with spaces replaced by # and starting with #
-            flickrtag = '#' + image.replace(' ','#')
-            photo = getPhotoIDbyTag(flickrtag)
-            logging.debug(image)
-            if(not photo):
-                uploaded.close()  # flush the DB file
-                continue
-            logging.debug("flickr2history: Reregistering %s photo in local history file" % image)
-            uploaded[ str(image)] = str(photo.id)
-            uploaded[ str(photo.id) ] =str(image)
-            uploaded.close()
+        if uploaded.has_key(str(image)):
+            continue
+        #each picture should have one id tag in the folder format with spaces replaced by # and starting with #
+        flickrtag = '#' + image.replace(' ','#')
+        photo = getPhotoIDbyTag(flickrtag)
+        logging.debug(image)
+        if not photo:
+            uploaded.close()  # flush the DB file
+            continue
+        logging.debug("flickr2history: Reregistering %s photo in local history file" % image)
+        uploaded[ str(image)] = str(photo.id)
+        uploaded[ str(photo.id) ] =str(image)
+        uploaded.close()
