@@ -278,15 +278,13 @@ class Uploadr:
 
     def upload( self, newImages ):
         self.uploaded = shelve.open( HISTORY_FILE )
-        reallyUploaded = []
         for image in newImages:
             up = self.uploadImage( image )
             if up:
-                reallyUploaded.append(up)
+                yield up
             if self.abandonUploads:
                 # the idea here is ctrl-c in the middle will still create sets
                 break
-        return reallyUploaded
 
 
     def grabNewImages( self ):
@@ -479,9 +477,11 @@ if __name__ == "__main__":
     #flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
 
     #uploads all images that are in folders and not in history file
-    uploaded = flickr.upload(images)  #uploads all new images to flickr
-    if len(uploaded) == 0:
-        logging.debug("Nothing uploaded, all done")
-    else:
-        #this will organize uploaded files into sets with the names according to tags
-        tags2set.createSets( HISTORY_FILE)
+    uploaded_now = []
+    for uploaded in flickr.upload(images):
+        uploaded_now.append(uploaded)
+        if len(uploaded_now) > 20:
+            tags2set.createSets(uploaded_now, HISTORY_FILE)
+            uploaded_now = []
+    if len(uploaded_now) > 0:
+        tags2set.createSets(uploaded_now, HISTORY_FILE)

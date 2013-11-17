@@ -12,6 +12,9 @@ configdict.read(os.path.expanduser('~/.uploadr.ini'))
 onlySubs = configdict.defaults()['only_sub_sets'] #set to true if Sets should be called only by the name of the last subfolder
 
 def  creatSet(photoSet, setName):
+    msg = "Generating set %s with %d pictures" % (setName, len(photoSet))
+    logging.debug(msg)
+    print msg
     setName = setName.replace('\\',' ')
     setName = setName.replace('/',' ')
     setName = string.strip(setName)
@@ -47,8 +50,14 @@ def  creatSet(photoSet, setName):
     logging.debug('tags2set: ...added %d photos' % len(photos)  )
     return fset
 
+def image2set(image):
+    if(onlySubs.startswith('true')):
+        _, setName = os.path.split(os.path.dirname(image))
+    else:
+        setName = os.path.dirname(image) #set name is realy a directory
+    return setName
 
-def createSets( historyFile):
+def createSets(uploaded_now, historyFile):
     global existingSets
     global user
 
@@ -64,26 +73,32 @@ def createSets( historyFile):
     uploaded = shelve.open( historyFile )
     keys = uploaded.keys()
     keys.sort()
+    uploaded_sets = set()
+    for uploadedid in uploaded_now:
+        try:
+            image = uploaded[str(uploadedid)]
+        except KeyError:
+            continue
+        uploaded_sets.add(image2set(image))
+
     lastSetName =''
     photoSet =[]
     setName = ''
     for image in keys:
         if image.find(os.path.sep) > -1: #filter out photoid keys
-            if(onlySubs.startswith('true')):
-                head, setName = os.path.split(os.path.dirname(image))
-            else:
-                setName = os.path.dirname(image) #set name is realy a directory
+            setName = image2set(image)
+            # only update sets that have been modified this round
+            if setName not in uploaded_sets:
+                continue
 
             if(not lastSetName == setName and not lastSetName == ''):
                 #new set is starting so save last
-                logging.debug( "Creating set %s with %d pictures" % (lastSetName, len(photoSet)) )
                 creatSet(photoSet, lastSetName)
                 photoSet = []
             logging.debug("tags2set: Adding image %s" % image)
             photoSet.append(uploaded.get(image))
             lastSetName = setName
 
-
     #dont forget to create last set
-    #logging.debug( "Creating set %s with %d pictures" % (setName, len(photoSet)) )
-    creatSet(photoSet, setName)
+    if len(photoSet) > 0:
+        creatSet(photoSet, setName)
