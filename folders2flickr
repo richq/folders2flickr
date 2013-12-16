@@ -1,5 +1,5 @@
 #!/usr/bin/env python
 
-import uploadr
+import f2flickr.uploadr
 if __name__ == '__main__':
-    uploadr.main()
+    f2flickr.uploadr.main()
