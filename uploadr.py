@@ -455,7 +455,7 @@ class Uploadr:
 
 
 
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(levelname)s %(message)s',
                 filename='debug.log',
@@ -485,3 +485,6 @@ if __name__ == "__main__":
             uploaded_now = []
     if len(uploaded_now) > 0:
         tags2set.createSets(uploaded_now, HISTORY_FILE)
+
+if __name__ == "__main__":
+    main()
