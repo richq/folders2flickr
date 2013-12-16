@@ -9,5 +9,4 @@ setup(name='folders2flickr',
       packages=['f2flickr'],
       author="Richard Quirk",
       download_url="https://github.com/richq/folders2flickr",
-      author_email="richard.quirk@gmail.com",
-      install_requires=[''])
+      author_email="richard@quirk.es")
