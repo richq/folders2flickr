@@ -2,7 +2,6 @@ This software contains files from multiple authors.  Individual files are
 licensed as follows. My modifications are released under the same license as
 the original files.
 
-deleteAll.py
 flickr2history.py
 setup.py
 tags2set.py
