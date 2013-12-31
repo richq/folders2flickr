@@ -1,7 +1,20 @@
 #!/usr/bin/env python
 
-import sys, time, os, urllib2, shelve, logging, flickr
-import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, tags2set
+import logging
+import md5
+import mimetools
+import mimetypes
+import os
+import shelve
+import sys
+import time
+import urllib2
+import webbrowser
+
+import exif
+import flickr
+import tags2set
+import xmltramp
 from configuration import configdict
 
 #

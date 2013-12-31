@@ -1,6 +1,10 @@
 #!/usr/bin/python
 
-import sys, os, shelve, logging
+import logging
+import os
+import shelve
+import sys
+
 import flickr
 import configuration
 

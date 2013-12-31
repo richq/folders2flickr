@@ -3,7 +3,9 @@
 
 __author__ = "pkolarov@gmail.com"
 
-import sys, shelve, logging
+import logging
+import shelve
+import sys
 import flickr
 
 user = None
