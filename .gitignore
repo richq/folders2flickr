@@ -1,4 +1,7 @@
 *.pyc
 /.flickrToken
+.flickrtoken
 debug.log
 error.log
+uploadr.ini
+history
