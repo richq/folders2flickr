@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
-import dbhash,anydbm
-import sys, os, shelve, logging,string
+import sys, os, shelve, logging
 import flickr
 import configuration
 
@@ -16,7 +15,7 @@ def  creatSet(photoSet, setName):
     print msg
     setName = setName.replace('\\',' ')
     setName = setName.replace('/',' ')
-    setName = string.strip(setName)
+    setName = setName.strip()
     photos = [] #real photo objects
     for p in photoSet:
         photos.append(flickr.Photo(id = p))

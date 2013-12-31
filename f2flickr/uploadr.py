@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import dbhash,anydbm
-import sys, time, os, urllib2, shelve, string, logging, flickr, re
-import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, flickr2history, tags2set
+import sys, time, os, urllib2, shelve, logging, flickr
+import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, tags2set
 from configuration import configdict
 
 #
@@ -469,10 +468,6 @@ def main():
 
     images = flickr.grabNewImages()
     logging.debug("Uploading images: %s"  % (str(images)))
-    #this is just double checking if everything is on Flickr what is in the history file
-    # in another words it will restore history file if deleted by comparing flickr with folders
-    # this takes too frickin long
-    #flickr2history.reshelf(images, IMAGE_DIR, HISTORY_FILE)
 
     #uploads all images that are in folders and not in history file
     uploaded_now = []
