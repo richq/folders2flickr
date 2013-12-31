@@ -39,6 +39,7 @@ IMAGE_DIR = configdict.get('imagedir')
 FLICKR = {"title": "",
         "description": "",
         "tags": "auto-upload",
+        "hidden": configdict.get('hidden', 2),
         "is_public": configdict.get('public'),
         "is_friend": configdict.get('friend'),
         "is_family": configdict.get('family') }
@@ -343,6 +344,7 @@ class Uploadr:
                 api.token   : str(self.token),
                 api.perms   : str(self.perms),
                 "tags"      : str(picTags),
+                "hidden"    : str( FLICKR["hidden"] ),
                 "is_public" : str( FLICKR["is_public"] ),
                 "is_friend" : str( FLICKR["is_friend"] ),
                 "is_family" : str( FLICKR["is_family"] )
