@@ -2,14 +2,13 @@
 
 import dbhash,anydbm
 import sys, os, shelve, logging,string
-from ConfigParser import *
 import flickr
+import configuration
 
 existingSets = None
 user = None
-configdict = ConfigParser()
-configdict.read(os.path.expanduser('~/.uploadr.ini'))
-onlySubs = configdict.defaults()['only_sub_sets'] #set to true if Sets should be called only by the name of the last subfolder
+# set to true if Sets should be called only by the name of the last subfolder
+onlySubs = configuration.configdict.get('only_sub_sets')
 
 def  creatSet(photoSet, setName):
     msg = "Generating set %s with %d pictures" % (setName, len(photoSet))

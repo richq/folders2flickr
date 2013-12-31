@@ -3,7 +3,7 @@
 import dbhash,anydbm
 import sys, time, os, urllib2, shelve, string, logging, flickr, re
 import xmltramp, mimetools, mimetypes, md5, webbrowser, exif, flickr2history, tags2set
-from ConfigParser import *
+from configuration import configdict
 
 #
 #   uploadr.py
@@ -29,28 +29,24 @@ from ConfigParser import *
 #
 #
 
-configdict = ConfigParser()
-configdict.read(os.path.expanduser('~/.uploadr.ini'))
-
-
 #
 # Location to scan for new images
 #
-IMAGE_DIR = configdict.defaults()['imagedir']
+IMAGE_DIR = configdict.get('imagedir')
 #
 #   Flickr settings
 #
 FLICKR = {"title": "",
         "description": "",
         "tags": "auto-upload",
-        "is_public": configdict.defaults()['public'],
-        "is_friend": configdict.defaults()['friend'],
-        "is_family": configdict.defaults()['family'] }
+        "is_public": configdict.get('public'),
+        "is_friend": configdict.get('friend'),
+        "is_family": configdict.get('family') }
 
 #
 #   File we keep the history of uploaded images in.
 #
-HISTORY_FILE = configdict.defaults()['history_file']
+HISTORY_FILE = configdict.get('history_file')
 
 #Kodak cam EXIF tag  keyword
 XPKEYWORDS = 'Image XPKeywords'
