@@ -12,8 +12,13 @@ class ConfigDict:
                 self.configdict.read(filename)
                 break
 
-    def get(self, configparam):
+    def get(self, configparam, default=None):
         """get the value from the ini file's default section."""
-        return self.configdict.defaults()[configparam]
+        defaults = self.configdict.defaults()
+        if configparam in defaults:
+            return defaults[configparam]
+        if default:
+            return default
+        raise KeyError(configparam)
 
 configdict = ConfigDict()
