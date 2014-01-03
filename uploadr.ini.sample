@@ -1,17 +1,9 @@
 [DEFAULT]
 #
-# Key and Hash codes. Get from Flickr
-#
-secret = 
-api_key = 
-
-#
 # Location to scan for new images (no trailing \)
 #
 # Example: imagedir = d:\pictures
 imagedir = 
-
-
 
 #
 # File we keep the history of uploaded images in.
@@ -31,3 +23,10 @@ hidden = 2
 # set this to true if name of the auto generated flickr sets should be only name of the last sub folder 
 # e.g. Crete when folder is d:\testpictures\holidays\Crete\123img.jpg
 only_sub_sets  = false
+
+#
+# Key and Hash codes. Use those established by the original folders2flicker author (default below)
+# or alternately request your own from Flickr.
+#
+secret = 13c314caee8b1f31
+api_key = 91dfde3ed605f6b8b9d9c38886547dcf
