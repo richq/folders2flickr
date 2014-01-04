@@ -2,6 +2,8 @@
 import os
 from ConfigParser import ConfigParser
 
+__copyright__ = "(C) 2014 Richard Quirk. GNU GPL v2 or later."
+
 class ConfigDict:
     """Singleton style/static initialisation wrapper thing"""
     def __init__(self):
