@@ -72,8 +72,8 @@ XPKEYWORDS = 'Image XPKeywords'
 ##
 ##  You shouldn't need to modify anything below here
 ##
-FLICKR["secret" ] = configdict.get('secret')
-FLICKR["api_key" ] = configdict.get('api_key')
+FLICKR["secret" ] = configdict.get('secret', '13c314caee8b1f31')
+FLICKR["api_key" ] = configdict.get('api_key', '91dfde3ed605f6b8b9d9c38886547dcf')
 flickr.API_KEY = FLICKR["api_key" ]
 flickr.API_SECRET = FLICKR["secret" ]
 flickr.tokenFile= ".flickrToken"
