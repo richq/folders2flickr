@@ -335,11 +335,11 @@ class Uploadr:
             realTags =  realTags.replace('_',' ')
             realTags =  realTags.replace('.',' ')
             realTags = realTags.strip()
-            
+
             if configdict.get('full_folder_tags', 'false').startswith('true'):
                 realTags = os.path.dirname(folderTag).split(os.sep)
                 realTags = (' '.join('"' + item + '"' for item in  realTags))
-            
+
             picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
 
             if exiftags == {}:
