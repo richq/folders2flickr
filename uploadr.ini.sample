@@ -24,6 +24,14 @@ hidden = 2
 # e.g. Crete when folder is d:\testpictures\holidays\Crete\123img.jpg
 only_sub_sets  = false
 
+# set full_folder_tags to true if you wish to override the original (default) parsing 
+# of folder tags and instead treat each sub-folder name as a complete tag.
+# Example: 
+# /path to/my picture/
+# false (Default), tags are parsed: "path" "to" "my" "picture"
+# true, tags are parsed: "path to" "my picture"
+full_folder_tags = false
+
 #
 # Key and Hash codes. Use those established by the original folders2flicker author (default below)
 # or alternately request your own from Flickr.
