@@ -8,11 +8,17 @@ class ConfigDict:
     """Singleton style/static initialisation wrapper thing"""
     def __init__(self):
         self.configdict = ConfigParser()
-        for filename in (os.path.expanduser('~/.uploadr.ini'), 'uploadr.ini'):
+        foundini = False
+        paths = (os.path.expanduser('~/.uploadr.ini'), os.path.abspath('uploadr.ini'))
+        for filename in paths:
             if os.path.exists(filename):
                 print 'using uploadr.ini file "%s"' % os.path.abspath(filename)
                 self.configdict.read(filename)
+                foundini = True
                 break
+        if not foundini:
+            raise IOError('Missing configuration file: ' + ' '.join(paths))
+
 
     def get(self, configparam, default=None):
         """get the value from the ini file's default section."""
