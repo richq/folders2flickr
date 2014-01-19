@@ -301,9 +301,10 @@ class Uploadr:
         get all images in folders and subfolders which match extensions below
         """
         images = []
-        foo = os.walk( IMAGE_DIR )
+        foo = os.walk( IMAGE_DIR, topdown=True )
         for data in foo:
             (dirpath, dirnames, filenames) = data
+            dirnames[:] = [d for d in dirnames if not d[0] == '.']
             for f in filenames :
                 ext = f.lower().split(".")[-1]
                 if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov"):
