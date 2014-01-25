@@ -25,10 +25,11 @@ def  creatSet(photoSet, setName):
         photos.append(flickr.Photo(id = p))
 
     fset = None
+    unicodeSetName = setName.decode('utf-8')
     #check if set with the name exists already
     for s in existingSets:
-        if(s.title == setName):
-            fset= s
+        if s.title == unicodeSetName:
+            fset = s
             logging.debug('tags2set: Found existing set %s' % setName)
            # return
             break
