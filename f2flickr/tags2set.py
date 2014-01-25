@@ -85,24 +85,27 @@ def createSets(uploaded_now, historyFile):
             continue
         uploaded_sets.add(image2set(image))
 
-    lastSetName =''
-    photoSet =[]
+    lastSetName = ''
+    photoSet = []
     setName = ''
     for image in keys:
-        if image.find(os.path.sep) > -1: #filter out photoid keys
-            setName = image2set(image)
-            # only update sets that have been modified this round
-            if setName not in uploaded_sets:
-                continue
+        if image.find(os.path.sep) == -1: #filter out photoid keys
+            continue
+        setName = image2set(image)
+        # only update sets that have been modified this round
+        if setName not in uploaded_sets:
+            continue
 
-            if(not lastSetName == setName and not lastSetName == ''):
-                #new set is starting so save last
-                creatSet(photoSet, lastSetName)
-                photoSet = []
-            logging.debug("tags2set: Adding image %s" % image)
-            photoSet.append(uploaded.get(image))
-            lastSetName = setName
+        if (not lastSetName == setName and not lastSetName == ''):
+            #new set is starting so save last
+            creatSet(photoSet, lastSetName)
+            photoSet = []
+        logging.debug("tags2set: Adding image %s" % image)
+        photoSet.append(uploaded.get(image))
+        lastSetName = setName
 
-    #dont forget to create last set
-    if len(photoSet) > 0:
-        creatSet(photoSet, setName)
+    existing = set([setentry.title for setentry in existingSets])
+    for uploaded_set in uploaded_sets:
+        if uploaded_set not in existing:
+            photoSet = [uploaded.get(photo) for photo in keys if photo.find(os.path.sep) != -1 and image2set(photo) == uploaded_set]
+            creatSet(photoSet, uploaded_set)
