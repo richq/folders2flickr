@@ -45,8 +45,9 @@ def  creatSet(photoSet, setName):
 
     try:
         fset.editPhotos(photos)
-    except:
+    except Exception, ex:
         logging.error('tags2set: Cannot edit set %s' % setName)
+        logging.error(str(ex))
         logging.error(sys.exc_info()[0])
 
 
