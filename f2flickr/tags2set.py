@@ -87,6 +87,7 @@ def createSets(uploaded_now, historyFile):
 
     lastSetName = ''
     photoSet = []
+    createdSets = set()
     setName = ''
     for image in keys:
         if image.find(os.path.sep) == -1: #filter out photoid keys
@@ -99,6 +100,7 @@ def createSets(uploaded_now, historyFile):
         if (not lastSetName == setName and not lastSetName == ''):
             #new set is starting so save last
             creatSet(photoSet, lastSetName)
+            createdSets.add(lastSetName)
             photoSet = []
         logging.debug("tags2set: Adding image %s" % image)
         photoSet.append(uploaded.get(image))
@@ -106,6 +108,6 @@ def createSets(uploaded_now, historyFile):
 
     existing = set([setentry.title for setentry in existingSets])
     for uploaded_set in uploaded_sets:
-        if uploaded_set not in existing:
+        if uploaded_set not in existing and uploaded_set not in createdSets:
             photoSet = [uploaded.get(photo) for photo in keys if photo.find(os.path.sep) != -1 and image2set(photo) == uploaded_set]
             creatSet(photoSet, uploaded_set)
