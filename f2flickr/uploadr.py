@@ -7,7 +7,6 @@ import mimetypes
 import os
 import shelve
 import sys
-import time
 import urllib2
 import webbrowser
 
@@ -351,10 +350,7 @@ class Uploadr:
                         picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
 
             picTags = picTags.strip()
-            msg = "Uploading image %s with tags %s" % (image, picTags)
-            timestamp = time.strftime('[%F %H:%M:%S]', time.localtime())
-            logging.debug(msg)
-            print timestamp, msg
+            logging.info("Uploading image %s with tags %s", image, picTags)
             photo = ('photo', image, open(image,'rb').read())
 
 
@@ -477,8 +473,13 @@ def main():
                 filename='debug.log',
                 filemode='w')
     logging.debug('Started')
-    console = logging.FileHandler('error.log')
-    console.setLevel(logging.ERROR)
+    errors = logging.FileHandler('error.log')
+    errors.setLevel(logging.ERROR)
+    logging.getLogger('').addHandler(errors)
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    console.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
     logging.getLogger('').addHandler(console)
 
     flickr = Uploadr()
