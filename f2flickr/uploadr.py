@@ -307,7 +307,7 @@ class Uploadr:
             for f in filenames :
                 ext = f.lower().split(".")[-1]
                 if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov"):
-                    images.append( os.path.normpath( dirpath + "/" + f ) )
+                    images.append(os.path.normpath(os.path.join(dirpath, f)))
         images.sort()
         return images
 
