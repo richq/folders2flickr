@@ -25,7 +25,7 @@ def  creatSet(photoSet, setName):
         photos.append(flickr.Photo(id = p))
 
     fset = None
-    unicodeSetName = setName.decode('utf-8')
+    unicodeSetName = setName.decode(sys.getfilesystemencoding())
     #check if set with the name exists already
     for s in existingSets:
         if s.title == unicodeSetName:
