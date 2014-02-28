@@ -78,8 +78,15 @@ flickr.API_SECRET = FLICKR["secret" ]
 flickr.tokenFile= ".flickrToken"
 flickr.AUTH = True
 
+def isGood(res):
+    return not res == "" and res('stat') == "ok"
 
-
+def getResponse(url):
+    """
+    Send the url and get a response.  Let errors float up
+    """
+    xml = urllib2.urlopen(url).read()
+    return xmltramp.parse(xml)
 
 class APIConstants:
     base = "http://flickr.com/services/"
@@ -159,8 +166,8 @@ class Uploadr:
         sig = self.signCall( d )
         url = self.urlGen( api.rest, d, sig )
         try:
-            response = self.getResponse( url )
-            if ( self.isGood( response ) ):
+            response = getResponse(url)
+            if isGood(response):
                 FLICKR[ api.frob ] = str(response.frob)
             else:
                 self.reportError( response )
@@ -217,8 +224,8 @@ class Uploadr:
         sig = self.signCall( d )
         url = self.urlGen( api.rest, d, sig )
         try:
-            res = self.getResponse( url )
-            if ( self.isGood( res ) ):
+            res = getResponse(url)
+            if isGood(res):
                 self.token = str(res.auth.token)
                 self.perms = str(res.auth.perms)
                 self.cacheToken()
@@ -271,8 +278,8 @@ class Uploadr:
             sig = self.signCall( d )
             url = self.urlGen( api.rest, d, sig )
             try:
-                res = self.getResponse( url )
-                if ( self.isGood( res ) ):
+                res = getResponse(url)
+                if isGood(res):
                     self.token = res.auth.token
                     self.perms = res.auth.perms
                     return True
@@ -369,7 +376,7 @@ class Uploadr:
             url = self.build_request(api.upload, d, (photo,))
             xml = urllib2.urlopen( url ).read()
             res = xmltramp.parse(xml)
-            if ( self.isGood( res ) ):
+            if isGood(res):
                 logging.debug( "successful.")
                 self.logUpload( res.photoid, folderTag )
                 return res.photoid
@@ -443,29 +450,12 @@ class Uploadr:
         content_type = 'multipart/form-data; boundary=%s' % BOUNDARY        # XXX what if no files are encoded
         return content_type, body
 
-
-    def isGood( self, res ):
-        if ( not res == "" and res('stat') == "ok" ):
-            return True
-        else :
-            return False
-
-
     def reportError( self, res ):
         logging.error(res)
         try:
             print "Error:", str( res.err('code') + " " + res.err('msg') )
         except:
             print "Error: " + str( res )
-
-    """
-    Send the url and get a response.  Let errors float up
-    """
-    def getResponse( self, url ):
-        xml = urllib2.urlopen( url ).read()
-        return xmltramp.parse( xml )
-
-
 
 def main():
     logging.basicConfig(level=logging.DEBUG,
