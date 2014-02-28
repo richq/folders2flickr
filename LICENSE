@@ -27,10 +27,3 @@ uploadr.py
 	#   Inspired by:
 	#        http://micampe.it/things/flickruploadr
 	#   You may use this code however you see fit in any form whatsoever.
-
-xmltramp.py
-	"""xmltramp: Make XML documents easily accessible."""
-	__version__ = "2.16"
-	__author__ = "Aaron Swartz"
-	__credits__ = "Many thanks to pjz, bitsko, and DanC."
-	__copyright__ = "(C) 2003 Aaron Swartz. GNU GPL 2."

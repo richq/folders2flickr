@@ -13,7 +13,7 @@ import webbrowser
 import exif
 import flickr
 import tags2set
-import xmltramp
+from xml.dom import minidom
 from configuration import configdict
 
 #
@@ -22,7 +22,6 @@ from configuration import configdict
 #   Upload images placed within a directory to your Flickr account.
 #
 #   Requires:
-#       xmltramp http://www.aaronsw.com/2002/xmltramp/
 #       flickr account http://flickr.com
 #
 #   Inspired by:
@@ -79,14 +78,14 @@ flickr.tokenFile= ".flickrToken"
 flickr.AUTH = True
 
 def isGood(res):
-    return not res == "" and res('stat') == "ok"
+    return not res == "" and res.stat == "ok"
 
 def getResponse(url):
     """
     Send the url and get a response.  Let errors float up
     """
-    xml = urllib2.urlopen(url).read()
-    return xmltramp.parse(xml)
+    data = flickr.unmarshal(minidom.parse(urllib2.urlopen(url)))
+    return data.rsp
 
 class APIConstants:
     base = "http://flickr.com/services/"
@@ -168,7 +167,7 @@ class Uploadr:
         try:
             response = getResponse(url)
             if isGood(response):
-                FLICKR[ api.frob ] = str(response.frob)
+                FLICKR[ api.frob ] = str(response.frob.text)
             else:
                 self.reportError( response )
         except:
@@ -226,8 +225,8 @@ class Uploadr:
         try:
             res = getResponse(url)
             if isGood(res):
-                self.token = str(res.auth.token)
-                self.perms = str(res.auth.perms)
+                self.token = str(res.auth.token.text)
+                self.perms = str(res.auth.perms.text)
                 self.cacheToken()
             else :
                 self.reportError( res )
@@ -280,8 +279,8 @@ class Uploadr:
             try:
                 res = getResponse(url)
                 if isGood(res):
-                    self.token = res.auth.token
-                    self.perms = res.auth.perms
+                    self.token = str(res.auth.token.text)
+                    self.perms = str(res.auth.perms.text)
                     return True
                 else :
                     self.reportError( res )
@@ -374,12 +373,12 @@ class Uploadr:
             d[ api.sig ] = sig
             d[ api.key ] = FLICKR[ api.key ]
             url = self.build_request(api.upload, d, (photo,))
-            xml = urllib2.urlopen( url ).read()
-            res = xmltramp.parse(xml)
+            res = getResponse(url)
             if isGood(res):
                 logging.debug( "successful.")
-                self.logUpload( res.photoid, folderTag )
-                return res.photoid
+                photoid = str(res.photoid.text)
+                self.logUpload(photoid, folderTag)
+                return photoid
             else :
                 print "problem.."
                 self.reportError( res )
@@ -451,11 +450,12 @@ class Uploadr:
         return content_type, body
 
     def reportError( self, res ):
-        logging.error(res)
         try:
-            print "Error:", str( res.err('code') + " " + res.err('msg') )
+            err = "Error:", str( res.err.code + " " + res.err.msg )
         except:
-            print "Error: " + str( res )
+            err = "Error: " + str( res )
+        logging.error(err)
+        print err
 
 def main():
     logging.basicConfig(level=logging.DEBUG,
