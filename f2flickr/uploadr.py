@@ -471,16 +471,16 @@ def main():
     console.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
     logging.getLogger('').addHandler(console)
 
-    flickr = Uploadr()
-    if ( not flickr.checkToken() ):
-        flickr.authenticate()
+    uploadinstance = Uploadr()
+    if not uploadinstance.checkToken():
+        uploadinstance.authenticate()
 
     images = grabNewImages()
     logging.debug("Uploading images: %s", str(images))
 
     #uploads all images that are in folders and not in history file
     uploaded_now = []
-    for uploaded in flickr.upload(images):
+    for uploaded in uploadinstance.upload(images):
         uploaded_now.append(uploaded)
         if len(uploaded_now) > 20:
             tags2set.createSets(uploaded_now, HISTORY_FILE)
