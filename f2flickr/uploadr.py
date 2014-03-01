@@ -62,10 +62,14 @@ HISTORY_FILE = configdict.get('history_file')
 #Kodak cam EXIF tag  keyword
 XPKEYWORDS = 'Image XPKeywords'
 
-
-
-
-
+# file extensions that will be uploaded (compared as lower case)
+ALLOWED_EXT = set('''
+jpg
+gif
+png
+avi
+mov
+'''.split())
 
 ##
 ##  You shouldn't need to modify anything below here
@@ -451,7 +455,7 @@ def grabNewImages():
         dirnames[:] = [d for d in dirnames if not d[0] == '.']
         for f in filenames :
             ext = f.lower().split(".")[-1]
-            if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov"):
+            if ext in ALLOWED_EXT:
                 images.append(os.path.normpath(os.path.join(dirpath, f)))
     images.sort()
     return images
