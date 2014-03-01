@@ -316,7 +316,7 @@ class Uploadr:
             return None
 
         try:
-            logging.debug( "Getting EXIF for %s" % image)
+            logging.debug("Getting EXIF for %s", image)
             f = open(image, 'rb')
             exiftags = exif.process_file(f)
             f.close()
@@ -340,7 +340,7 @@ class Uploadr:
             picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
 
             if exiftags == {}:
-                logging.debug( 'NO_EXIF_HEADER for %s' % image)
+                logging.debug('NO_EXIF_HEADER for %s', image)
             else:
                 if XPKEYWORDS in exiftags:  #look for additional tags in EXIF to tag picture with
                     if len(exiftags[XPKEYWORDS].printable) > 4:
@@ -476,7 +476,7 @@ def main():
         flickr.authenticate()
 
     images = grabNewImages()
-    logging.debug("Uploading images: %s"  % (str(images)))
+    logging.debug("Uploading images: %s", str(images))
 
     #uploads all images that are in folders and not in history file
     uploaded_now = []
