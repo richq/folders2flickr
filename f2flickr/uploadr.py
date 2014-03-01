@@ -87,6 +87,15 @@ def getResponse(url):
     data = flickr.unmarshal(minidom.parse(urllib2.urlopen(url)))
     return data.rsp
 
+def reportError(res):
+    try:
+        err = "Error:", str( res.err.code + " " + res.err.msg )
+    except AttributeError:
+        err = "Error: " + str( res )
+    logging.error(err)
+    print err
+
+
 class APIConstants:
     base = "http://flickr.com/services/"
     rest   = base + "rest/"
@@ -169,7 +178,7 @@ class Uploadr:
             if isGood(response):
                 FLICKR[ api.frob ] = str(response.frob.text)
             else:
-                self.reportError( response )
+                reportError(response)
         except:
             print "Error getting frob:" , str( sys.exc_info() )
             logging.error(sys.exc_info())
@@ -229,7 +238,7 @@ class Uploadr:
                 self.perms = str(res.auth.perms.text)
                 self.cacheToken()
             else :
-                self.reportError( res )
+                reportError(res)
         except:
             print str( sys.exc_info() )
             logging.error(sys.exc_info())
@@ -283,7 +292,7 @@ class Uploadr:
                     self.perms = str(res.auth.perms.text)
                     return True
                 else :
-                    self.reportError( res )
+                    reportError(res)
             except:
                 print str( sys.exc_info() )
                 logging.error(sys.exc_info())
@@ -299,24 +308,6 @@ class Uploadr:
             if self.abandonUploads:
                 # the idea here is ctrl-c in the middle will still create sets
                 break
-
-
-    def grabNewImages( self ):
-        """
-        get all images in folders and subfolders which match extensions below
-        """
-        images = []
-        foo = os.walk( IMAGE_DIR, topdown=True )
-        for data in foo:
-            (dirpath, dirnames, filenames) = data
-            dirnames[:] = [d for d in dirnames if not d[0] == '.']
-            for f in filenames :
-                ext = f.lower().split(".")[-1]
-                if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov"):
-                    images.append(os.path.normpath(os.path.join(dirpath, f)))
-        images.sort()
-        return images
-
 
     def uploadImage( self, image ):
         folderTag = image[len(IMAGE_DIR):]
@@ -381,7 +372,7 @@ class Uploadr:
                 return photoid
             else :
                 print "problem.."
-                self.reportError( res )
+                reportError(res)
         except KeyboardInterrupt, ex:
             logging.debug("Keyboard interrupt seen, abandon uploads")
             print "Stopping uploads..."
@@ -449,13 +440,21 @@ class Uploadr:
         content_type = 'multipart/form-data; boundary=%s' % BOUNDARY        # XXX what if no files are encoded
         return content_type, body
 
-    def reportError( self, res ):
-        try:
-            err = "Error:", str( res.err.code + " " + res.err.msg )
-        except:
-            err = "Error: " + str( res )
-        logging.error(err)
-        print err
+def grabNewImages():
+    """
+    get all images in folders and subfolders which match extensions below
+    """
+    images = []
+    foo = os.walk( IMAGE_DIR, topdown=True )
+    for data in foo:
+        (dirpath, dirnames, filenames) = data
+        dirnames[:] = [d for d in dirnames if not d[0] == '.']
+        for f in filenames :
+            ext = f.lower().split(".")[-1]
+            if ( ext == "jpg" or ext == "gif" or ext == "png" or ext == "avi" or ext == "mov"):
+                images.append(os.path.normpath(os.path.join(dirpath, f)))
+    images.sort()
+    return images
 
 def main():
     logging.basicConfig(level=logging.DEBUG,
@@ -476,7 +475,7 @@ def main():
     if ( not flickr.checkToken() ):
         flickr.authenticate()
 
-    images = flickr.grabNewImages()
+    images = grabNewImages()
     logging.debug("Uploading images: %s"  % (str(images)))
 
     #uploads all images that are in folders and not in history file
