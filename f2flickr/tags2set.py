@@ -8,11 +8,13 @@ import sys
 import flickr
 import configuration
 
-existingSets = None
 # set to true if Sets should be called only by the name of the last subfolder
 onlySubs = configuration.configdict.get('only_sub_sets')
 
-def  creatSet(photoSet, setName):
+def _creatSet(photoSet, setName, existingSets):
+    """
+    Creates or updates a set on flickr with the given photos.
+    """
     msg = "Generating set %s with %d pictures" % (setName, len(photoSet))
     logging.debug(msg)
     print msg
@@ -30,7 +32,6 @@ def  creatSet(photoSet, setName):
         if s.title == unicodeSetName:
             fset = s
             logging.debug('tags2set: Found existing set %s', setName)
-           # return
             break
     try:
         if(fset == None):
@@ -61,8 +62,6 @@ def image2set(image):
     return setName
 
 def createSets(uploaded_now, historyFile):
-    global existingSets
-
     logging.debug('tags2set: Started tags2set')
     try:
         user = flickr.test_login()
@@ -97,7 +96,7 @@ def createSets(uploaded_now, historyFile):
 
         if (not lastSetName == setName and not lastSetName == ''):
             #new set is starting so save last
-            creatSet(photoSet, lastSetName)
+            _creatSet(photoSet, lastSetName, existingSets)
             createdSets.add(lastSetName)
             photoSet = []
         logging.debug("tags2set: Adding image %s", image)
@@ -107,8 +106,8 @@ def createSets(uploaded_now, historyFile):
     existing = set([setentry.title for setentry in existingSets])
     for uploaded_set in uploaded_sets:
         if uploaded_set not in existing or uploaded_set not in createdSets:
-            creatSet([uploaded.get(photo) for photo in keys if (
+            _creatSet([uploaded.get(photo) for photo in keys if (
                             photo.find(os.path.sep) != -1
                             and image2set(photo) == uploaded_set)],
-                uploaded_set)
+                uploaded_set, existingSets)
             createdSets.add(uploaded_set)
