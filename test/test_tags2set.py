@@ -4,19 +4,11 @@ Test case for tags2set.py
 import logging
 import sys
 import os
-try:
-    inifile = open('uploadr.ini', 'w')
-    sample = open('../uploadr.ini.sample', 'r')
-    inifile.write(sample.read())
-    inifile.close()
-except IOError:
-    sys.exit(1)
-sys.path.append('..')
 import unittest
 import tempfile
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 import fakeflickr
 import shelve
-import f2flickr.tags2set
 
 def addinvert(dictthing):
     """
@@ -31,6 +23,15 @@ class Tags2SetTest(unittest.TestCase):
     """
     Test suite for tags2set.py
     """
+    def setUp(self):
+        inifile = open('uploadr.ini', 'w')
+        sample = open('uploadr.ini.sample', 'r')
+        inifile.write(sample.read())
+        inifile.close()
+        import f2flickr.tags2set
+
+    def tearDown(self):
+        os.unlink('uploadr.ini')
 
     def testSetIsUpdated(self):
         """
@@ -38,6 +39,7 @@ class Tags2SetTest(unittest.TestCase):
         First upload 20 photos, then upload some more, up to 44
         The 44 should be in the set.
         """
+        import f2flickr.tags2set
         historyFile = tempfile.mktemp()
         fakeuploaded = shelve.open(historyFile)
         for i in range(1, 21):

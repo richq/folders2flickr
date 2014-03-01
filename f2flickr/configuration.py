@@ -9,7 +9,7 @@ class ConfigDict:
     def __init__(self):
         self.configdict = ConfigParser()
         foundini = False
-        paths = (os.path.expanduser('~/.uploadr.ini'), os.path.abspath('uploadr.ini'))
+        paths = (os.path.abspath('uploadr.ini'), os.path.expanduser('~/.uploadr.ini'))
         for filename in paths:
             if os.path.exists(filename):
                 print 'using uploadr.ini file "%s"' % os.path.abspath(filename)
