@@ -69,7 +69,7 @@ def createSets(uploaded_now, historyFile):
     try:
         user = flickr.test_login()
         logging.debug(user.id)
-        existingSets=user.getPhotosets()
+        existingSets = user.getPhotosets()
     except:
         logging.error(sys.exc_info()[0])
         return None
@@ -109,6 +109,8 @@ def createSets(uploaded_now, historyFile):
     existing = set([setentry.title for setentry in existingSets])
     for uploaded_set in uploaded_sets:
         if uploaded_set not in existing or uploaded_set not in createdSets:
-            photoSet = [uploaded.get(photo) for photo in keys if photo.find(os.path.sep) != -1 and image2set(photo) == uploaded_set]
-            creatSet(photoSet, uploaded_set)
+            creatSet([uploaded.get(photo) for photo in keys if (
+                            photo.find(os.path.sep) != -1
+                            and image2set(photo) == uploaded_set)],
+                uploaded_set)
             createdSets.add(uploaded_set)
