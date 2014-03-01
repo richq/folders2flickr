@@ -9,7 +9,6 @@ import flickr
 import configuration
 
 existingSets = None
-user = None
 # set to true if Sets should be called only by the name of the last subfolder
 onlySubs = configuration.configdict.get('only_sub_sets')
 
@@ -63,7 +62,6 @@ def image2set(image):
 
 def createSets(uploaded_now, historyFile):
     global existingSets
-    global user
 
     logging.debug('tags2set: Started tags2set')
     try:
