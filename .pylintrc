@@ -1,0 +1,8 @@
+# export PYLINTRC=$PWD/.pylintrc
+[BASIC]
+function-rgx=_?[a-z][A-Za-z0-9]{1,30}$
+method-rgx=_?[a-z][A-Za-z0-9]{1,30}$
+attr-rgx=_?[a-z][A-Za-z0-9]{1,30}$
+argument-rgx=_?[a-z][A-Za-z0-9]{1,30}$
+variable-rgx=_?[a-z][A-Za-z0-9]{1,30}$
+inlinevar-rgx=_?[a-z][A-Za-z0-9]{1,30}$
