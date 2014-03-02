@@ -17,9 +17,6 @@ def _creatSet(photoSet, setName, existingSets):
     """
     Creates or updates a set on flickr with the given photos.
     """
-    msg = "Generating set %s with %d pictures" % (setName, len(photoSet))
-    logging.debug(msg)
-    print msg
     setName = setName.replace('\\',' ')
     setName = setName.replace('/',' ')
     setName = setName.strip()
@@ -30,11 +27,16 @@ def _creatSet(photoSet, setName, existingSets):
     fset = None
     unicodeSetName = setName.decode(sys.getfilesystemencoding())
     #check if set with the name exists already
+    generate = 'Generating'
     for s in existingSets:
         if s.title == unicodeSetName:
             fset = s
             logging.debug('tags2set: Found existing set %s', setName)
+            generate = 'Updating'
             break
+    msg = "%s set %s with %d pictures" % (generate, setName, len(photoSet))
+    logging.debug(msg)
+    print msg
     try:
         if(fset == None):
             logging.debug("tags2set: create set %s with photo %s", setName, photos[0])
