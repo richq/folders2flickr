@@ -479,14 +479,14 @@ def main():
     logging.debug("Uploading images: %s", str(images))
 
     #uploads all images that are in folders and not in history file
-    uploaded_now = []
+    uploadedNow = []
     for uploaded in uploadinstance.upload(images):
-        uploaded_now.append(uploaded)
-        if len(uploaded_now) > 20:
-            tags2set.createSets(uploaded_now, HISTORY_FILE)
-            uploaded_now = []
-    if len(uploaded_now) > 0:
-        tags2set.createSets(uploaded_now, HISTORY_FILE)
+        uploadedNow.append(uploaded)
+        if len(uploadedNow) > 20:
+            tags2set.createSets(uploadedNow, HISTORY_FILE)
+            uploadedNow = []
+    if len(uploadedNow) > 0:
+        tags2set.createSets(uploadedNow, HISTORY_FILE)
 
 if __name__ == "__main__":
     main()
