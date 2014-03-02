@@ -10,8 +10,6 @@ import sys
 import f2flickr.flickr as flickr
 import f2flickr.configuration as configuration
 
-# set to true if Sets should be called only by the name of the last subfolder
-onlySubs = configuration.configdict.get('only_sub_sets')
 
 def _creatSet(photoSet, setName, existingSets):
     """
@@ -59,11 +57,17 @@ def _creatSet(photoSet, setName, existingSets):
     return fset
 
 def image2set(image):
-    if(onlySubs.startswith('true')):
-        _, setName = os.path.split(os.path.dirname(image))
+    """
+    Get the set name for a given image path
+    """
+    # if true, Set name is the name of the last subfolder
+    onlysubs = configuration.configdict.get('only_sub_sets')
+    if onlysubs.startswith('true'):
+        _, setname = os.path.split(os.path.dirname(image))
     else:
-        setName = os.path.dirname(image) #set name is realy a directory
-    return setName
+        #set name is really a directory
+        setname = os.path.dirname(image)
+    return setname
 
 def createSets(uploaded_now, historyFile):
     logging.debug('tags2set: Started tags2set')

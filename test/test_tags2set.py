@@ -89,7 +89,7 @@ class Tags2SetTest(unittest.TestCase):
         """
         import f2flickr.tags2set
         uploaded, historyFile = self.createHistory()
-        f2flickr.tags2set.onlySubs = 'false'
+        f2flickr.configuration.configdict = f2flickr.configuration.ConfigDict()
         f2flickr.tags2set.createSets(uploaded, historyFile)
         user = fakeflickr.fakelogin()
         self.assertEquals(1, len(user.getPhotosets()))
@@ -102,6 +102,7 @@ class Tags2SetTest(unittest.TestCase):
         Check only_sub_sets = false
         """
         import f2flickr.tags2set
+        import f2flickr.configuration
         uploaded, historyFile = self.createHistory()
         tmp = open('uploadr.ini', 'r')
         lines = tmp.readlines()
@@ -110,10 +111,9 @@ class Tags2SetTest(unittest.TestCase):
         for line in lines:
             if line.startswith('only_sub_sets'):
                 line = line.replace('false', 'true')
-            logging.debug(line.strip())
             tmp.write(line)
         tmp.close()
-        f2flickr.tags2set.onlySubs = 'true'
+        f2flickr.configuration.configdict = f2flickr.configuration.ConfigDict()
         f2flickr.tags2set.createSets(uploaded, historyFile)
         user = fakeflickr.fakelogin()
         self.assertEquals(1, len(user.getPhotosets()))
