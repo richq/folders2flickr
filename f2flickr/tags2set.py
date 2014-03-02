@@ -20,16 +20,16 @@ def _creatSet(photoSet, setName, existingSets):
     setName = setName.replace('/',' ')
     setName = setName.strip()
     photos = [] #real photo objects
-    for p in photoSet:
-        photos.append(flickr.Photo(id = p))
+    for photo in photoSet:
+        photos.append(flickr.Photo(id = photo))
 
     fset = None
     unicodeSetName = setName.decode(sys.getfilesystemencoding())
     #check if set with the name exists already
     generate = 'Generating'
-    for s in existingSets:
-        if s.title == unicodeSetName:
-            fset = s
+    for existingSet in existingSets:
+        if existingSet.title == unicodeSetName:
+            fset = existingSet
             logging.debug('tags2set: Found existing set %s', setName)
             generate = 'Updating'
             break
@@ -71,7 +71,10 @@ def image2set(image):
         setname = os.path.dirname(image)
     return setname
 
-def createSets(uploaded_now, historyFile):
+def createSets(uploadedNow, historyFile):
+    """
+    Create/update all sets for the photos just uploaded
+    """
     logging.debug('tags2set: Started tags2set')
     try:
         user = flickr.test_login()
@@ -84,13 +87,13 @@ def createSets(uploaded_now, historyFile):
     uploaded = shelve.open( historyFile )
     keys = uploaded.keys()
     keys.sort()
-    uploaded_sets = set()
-    for uploadedid in uploaded_now:
+    uploadedSets = set()
+    for uploadedid in uploadedNow:
         try:
             image = uploaded[str(uploadedid)]
         except KeyError:
             continue
-        uploaded_sets.add(image2set(image))
+        uploadedSets.add(image2set(image))
 
     lastSetName = ''
     photoSet = []
@@ -101,7 +104,7 @@ def createSets(uploaded_now, historyFile):
             continue
         setName = image2set(image)
         # only update sets that have been modified this round
-        if setName not in uploaded_sets:
+        if setName not in uploadedSets:
             continue
 
         if (not lastSetName == setName and not lastSetName == ''):
@@ -114,10 +117,10 @@ def createSets(uploaded_now, historyFile):
         lastSetName = setName
 
     existing = set([setentry.title for setentry in existingSets])
-    for uploaded_set in uploaded_sets:
-        if uploaded_set not in existing or uploaded_set not in createdSets:
+    for uploadedSet in uploadedSets:
+        if uploadedSet not in existing or uploadedSet not in createdSets:
             _creatSet([uploaded.get(photo) for photo in keys if (
                             photo.find(os.path.sep) != -1
-                            and image2set(photo) == uploaded_set)],
-                uploaded_set, existingSets)
-            createdSets.add(uploaded_set)
+                            and image2set(photo) == uploadedSet)],
+                uploadedSet, existingSets)
+            createdSets.add(uploadedSet)
