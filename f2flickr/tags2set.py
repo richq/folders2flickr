@@ -1,5 +1,7 @@
 #!/usr/bin/python
-
+"""
+Creates the sets for uploaded photos
+"""
 import logging
 import os
 import shelve

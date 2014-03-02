@@ -1,4 +1,23 @@
 #!/usr/bin/env python
+"""
+Upload images placed within a directory to your Flickr account.
+
+Requires:
+    flickr account http://flickr.com
+
+Inspired by:
+     http://micampe.it/things/flickruploadr
+
+
+September 2005
+Cameron Mallory   cmallory/berserk.org
+
+This code has been updated to use the new Auth API from flickr.
+
+You may use this code however you see fit in any form whatsoever.
+
+2009 Peter Kolarov  -  Updated with fixes and new functionality
+"""
 
 import logging
 import md5
@@ -15,29 +34,6 @@ import flickr
 import tags2set
 from xml.dom import minidom
 from configuration import configdict
-
-#
-#   uploadr.py
-#
-#   Upload images placed within a directory to your Flickr account.
-#
-#   Requires:
-#       flickr account http://flickr.com
-#
-#   Inspired by:
-#        http://micampe.it/things/flickruploadr
-#
-#
-#   September 2005
-#   Cameron Mallory   cmallory/berserk.org
-#
-#   This code has been updated to use the new Auth API from flickr.
-#
-#   You may use this code however you see fit in any form whatsoever.
-#
-#   2009 Peter Kolarov  -  Updated with fixes and new functionality
-#
-#
 
 #
 # Location to scan for new images
