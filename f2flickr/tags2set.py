@@ -7,8 +7,8 @@ import os
 import shelve
 import sys
 
-import flickr
-import configuration
+import f2flickr.flickr as flickr
+import f2flickr.configuration as configuration
 
 # set to true if Sets should be called only by the name of the last subfolder
 onlySubs = configuration.configdict.get('only_sub_sets')

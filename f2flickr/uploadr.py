@@ -29,11 +29,11 @@ import sys
 import urllib2
 import webbrowser
 
-import exif
-import flickr
-import tags2set
+import f2flickr.exif as exif
+import f2flickr.flickr as flickr
+import f2flickr.tags2set as tags2set
+from f2flickr.configuration import configdict
 from xml.dom import minidom
-from configuration import configdict
 
 #
 # Location to scan for new images
