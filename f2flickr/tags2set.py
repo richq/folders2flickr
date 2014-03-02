@@ -78,7 +78,8 @@ def createSets(uploadedNow, historyFile):
     logging.debug('tags2set: Started tags2set')
     try:
         user = flickr.test_login()
-        logging.debug(user.id)
+        if not user.id:
+            return None
         existingSets = user.getPhotosets()
     except:
         logging.error(sys.exc_info()[0])
