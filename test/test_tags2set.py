@@ -24,6 +24,8 @@ class Tags2SetTest(unittest.TestCase):
     Test suite for tags2set.py
     """
     def setUp(self):
+        user = fakeflickr.fakelogin()
+        user.clearPhotosetsInternal()
         inifile = open('uploadr.ini', 'w')
         sample = open('uploadr.ini.sample', 'r')
         inifile.write(sample.read())
@@ -69,6 +71,55 @@ class Tags2SetTest(unittest.TestCase):
         self.assertEquals(44, len(photos))
 
         os.remove(historyFile)
+
+    def createHistory(self):
+        historyFile = tempfile.mktemp()
+        fakeuploaded = shelve.open(historyFile)
+        for i in range(1, 3):
+            fakeuploaded[str(i)] = 'holidays/Crete/img%d.jpg' % i
+        uploaded = []
+        uploaded[:] = fakeuploaded.keys()
+        addinvert(fakeuploaded)
+        fakeuploaded.close()
+        return uploaded, historyFile
+
+    def testOnlySubsFalse(self):
+        """
+        Check only_sub_sets = false
+        """
+        import f2flickr.tags2set
+        uploaded, historyFile = self.createHistory()
+        f2flickr.tags2set.onlySubs = 'false'
+        f2flickr.tags2set.createSets(uploaded, historyFile)
+        user = fakeflickr.fakelogin()
+        self.assertEquals(1, len(user.getPhotosets()))
+        ps = user.getPhotosets()[0]
+        self.assertEquals('holidays Crete', ps.title)
+
+
+    def testOnlySubsTrue(self):
+        """
+        Check only_sub_sets = false
+        """
+        import f2flickr.tags2set
+        uploaded, historyFile = self.createHistory()
+        tmp = open('uploadr.ini', 'r')
+        lines = tmp.readlines()
+        tmp.close()
+        tmp = open('uploadr.ini', 'w')
+        for line in lines:
+            if line.startswith('only_sub_sets'):
+                line = line.replace('false', 'true')
+            logging.debug(line.strip())
+            tmp.write(line)
+        tmp.close()
+        f2flickr.tags2set.onlySubs = 'true'
+        f2flickr.tags2set.createSets(uploaded, historyFile)
+        user = fakeflickr.fakelogin()
+        self.assertEquals(1, len(user.getPhotosets()))
+        ps = user.getPhotosets()[0]
+        self.assertEquals('Crete', ps.title)
+
 
 if __name__ == '__main__':
 

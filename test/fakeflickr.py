@@ -21,6 +21,9 @@ class FakeUser(object):
     def addPhotosetInternal(self, ps):
         self._photosets.append(ps)
 
+    def clearPhotosetsInternal(self):
+        self._photosets = []
+
 thefakeuser = FakeUser()
 def fakelogin():
     return thefakeuser
