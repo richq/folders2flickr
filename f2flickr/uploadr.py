@@ -127,6 +127,7 @@ class Uploadr:
     def __init__( self ):
         self.token = self.getCachedToken()
         self.abandonUploads = False
+        self.uploaded = {}
 
     def signCall(self, data):
         """
