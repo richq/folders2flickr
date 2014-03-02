@@ -74,10 +74,13 @@ FLICKR["secret" ] = configdict.get('secret', '13c314caee8b1f31')
 FLICKR["api_key" ] = configdict.get('api_key', '91dfde3ed605f6b8b9d9c38886547dcf')
 flickr.API_KEY = FLICKR["api_key" ]
 flickr.API_SECRET = FLICKR["secret" ]
-flickr.tokenFile= ".flickrToken"
+flickr.tokenFile = ".flickrToken"
 flickr.AUTH = True
 
 def isGood(res):
+    """
+    Returns True if the response was OK.
+    """
     return not res == "" and res.stat == "ok"
 
 def getResponse(url):
@@ -85,6 +88,7 @@ def getResponse(url):
     Send the url and get a response.  Let errors float up
     """
     data = flickr.unmarshal(minidom.parse(urllib2.urlopen(url)))
+    # pylint: disable=E1101
     return data.rsp
 
 def reportError(res):
@@ -124,10 +128,11 @@ class Uploadr:
         self.token = self.getCachedToken()
         self.abandonUploads = False
 
-    """
-    Signs args via md5 per http://www.flickr.com/services/api/auth.spec.html (Section 8)
-    """
-    def signCall( self, data):
+    def signCall(self, data):
+        """
+        Signs args via md5 per Section 8 of
+        http://www.flickr.com/services/api/auth.spec.html
+        """
         keys = data.keys()
         keys.sort()
         foo = ""
@@ -138,7 +143,7 @@ class Uploadr:
         #f = api.key + FLICKR[ api.key ] + foo
         return md5.new( f ).hexdigest()
 
-    def urlGen( self , base,data, sig ):
+    def urlGen(self, base, data, sig):
         foo = base + "?"
         for d in data:
             foo += d + "=" + data[d] + "&"
@@ -149,6 +154,9 @@ class Uploadr:
     #   Authenticate user so we can upload images
     #
     def authenticate( self ):
+        """
+        Authenticate user so we can upload images
+        """
         #print "Getting new Token"
         self.getFrob()
         self.getAuthKey()
@@ -384,7 +392,9 @@ class Uploadr:
 
 
     def logUpload( self, photoID, imageName ):
-
+        """
+        Records the uploaded photo in the history file
+        """
         photoID = str( photoID )
         imageName = str( imageName )
         self.uploaded[ imageName ] = photoID
@@ -457,6 +467,9 @@ def grabNewImages():
     return images
 
 def main():
+    """
+    Initial entry point for the uploads
+    """
     logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(levelname)s %(message)s',
                 filename='debug.log',
