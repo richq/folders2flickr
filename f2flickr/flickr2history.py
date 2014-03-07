@@ -1,58 +1,65 @@
 #!/usr/bin/python
-
+"""
+A way to recreate the history database of uploaded files from the photos stored
+on flickr.
+"""
 
 __author__ = "pkolarov@gmail.com"
 
 import logging
 import shelve
 import sys
-import flickr
+import f2flickr.flickr as flickr
 
-user = None
+def getPhotoIDbyTag(tag, user):
+    """
+    Get one and only one photo for the given tags or None
+    this works only if we previously tagged all the pics on Flickr with
+    uploader tool automaticaly
 
-
-
-#get one and only one photo for the given tags or None
-#this works only if we previously tagged all the pics on Flickr with uploader tool automaticaly
-#
-#Plus delete images that contain the same TAGS !!!!
-def getPhotoIDbyTag(tag):
+    Plus delete images that contain the same TAGS !!!!
+    """
     retries = 0
     photos = None
     while (retries < 3):
         try:
             logging.debug(user.id)
-            photos = flickr.photos_search(user_id=user.id, auth=all, tags=tag,tag_mode='any')
+            photos = flickr.photos_search(user_id=user.id, auth=all, tags=tag,
+                                          tag_mode='any')
             break
         except:
-            logging.error("flickr2history: Flickr error while searching ....retrying")
+            logging.error("flickr2history: Flickr error in search, retrying")
             logging.error(sys.exc_info()[0])
 
         retries = retries + 1
 
     if (not photos or len(photos) == 0):
-        logging.debug("flickr2history: No image in Flickr (yet) with tags %s (possibly deleted in Flickr by user)" % tag)
+        logging.debug("flickr2history: No image in Flickr (yet) with tags %s " +
+                      "(possibly deleted in Flickr by user)", tag)
         return None
 
-    logging.debug("flickr2history: Tag=%s found %d" % (tag, len(photos)))
+    logging.debug("flickr2history: Tag=%s found %d", tag, len(photos))
     while (len(photos)>1):
-        logging.debug( "flickr2history :Tag %s matches %d images!" % (tag, len(photos)))
+        logging.debug("flickr2history: Tag %s matches %d images!",
+                      tag, len(photos))
         logging.debug("flickr2history: Removing other images")
         try:
             photos.pop().delete()
         except:
-            logging.error("flickr2history: Flickr error while deleting duplicate image")
+            logging.error("flickr2history: Flickr error while " +
+                          "deleting duplicate image")
             logging.error(sys.exc_info()[0])
 
     return photos[0]
 
-#store image reference in the history file if its not there yet and if we actually can
-#find it on Flickr
 def reshelf(images,  imageDir, historyFile):
+    """
+    Store image reference in the history file if its not there yet and if we
+    actually can find it on Flickr.
+    """
 
     logging.debug('flickr2history: Started flickr2history')
     try:
-        global user
         user = flickr.test_login()
         logging.debug(user.id)
     except:
@@ -60,18 +67,22 @@ def reshelf(images,  imageDir, historyFile):
         return None
 
     for image in images:
-        image = image[len(imageDir):] #remove absolute directory
-        uploaded = shelve.open( historyFile )   #its better to always reopen this file
+        # remove absolute directory
+        image = image[len(imageDir):]
+        # its better to always reopen this file
+        uploaded = shelve.open( historyFile )
         if uploaded.has_key(str(image)):
             continue
-        #each picture should have one id tag in the folder format with spaces replaced by # and starting with #
+        # each picture should have one id tag in the folder format with spaces
+        # replaced by # and starting with #
         flickrtag = '#' + image.replace(' ','#')
-        photo = getPhotoIDbyTag(flickrtag)
+        photo = getPhotoIDbyTag(flickrtag, user)
         logging.debug(image)
         if not photo:
             uploaded.close()  # flush the DB file
             continue
-        logging.debug("flickr2history: Reregistering %s photo in local history file" % image)
+        logging.debug("flickr2history: Reregistering %s photo "+
+                      "in local history file", image)
         uploaded[ str(image)] = str(photo.id)
         uploaded[ str(photo.id) ] =str(image)
         uploaded.close()
