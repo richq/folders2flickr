@@ -165,11 +165,27 @@ class APIConstants:
 
 api = APIConstants()
 
-def urlGen(base, data, sig):
+def signCall(data):
+    """
+    Signs args via md5 per Section 8 of
+    http://www.flickr.com/services/api/auth.spec.html
+    """
+    keys = data.keys()
+    keys.sort()
+    args = ""
+    for key in keys:
+        args += (key + data[key])
+
+    tohash = FLICKR[ api.secret ] + api.key + FLICKR[ api.key ] + args
+    return md5.new(tohash).hexdigest()
+
+
+def urlGen(base, data):
     """
     Creates the url from the template
     base/?key=value...&api_key=key&api_sig=sig
     """
+    sig = signCall(data)
     data[api.key] = FLICKR[api.key]
     data[api.sig] = sig
     query = '&'.join(key+'='+value for key, value in data.iteritems())
@@ -184,21 +200,6 @@ class Uploadr:
         self.token = self.getCachedToken()
         self.abandonUploads = False
         self.uploaded = {}
-
-    def signCall(self, data):
-        """
-        Signs args via md5 per Section 8 of
-        http://www.flickr.com/services/api/auth.spec.html
-        """
-        keys = data.keys()
-        keys.sort()
-        foo = ""
-        for a in keys:
-            foo += (a + data[a])
-
-        f = FLICKR[ api.secret ] + api.key + FLICKR[ api.key ] + foo
-        #f = api.key + FLICKR[ api.key ] + foo
-        return md5.new( f ).hexdigest()
 
     def authenticate( self ):
         """
@@ -226,8 +227,7 @@ class Uploadr:
         d = {
             api.method  : "flickr.auth.getFrob"
             }
-        sig = self.signCall( d )
-        url = urlGen(api.rest, d, sig)
+        url = urlGen(api.rest, d)
         try:
             response = getResponse(url)
             if isGood(response):
@@ -246,8 +246,7 @@ class Uploadr:
             api.frob : FLICKR[ api.frob ],
             api.perms : "delete"
             }
-        sig = self.signCall( d )
-        url = urlGen(api.auth, d, sig)
+        url = urlGen(api.auth, d)
         ans = ""
         try:
             webbrowser.open( url )
@@ -284,8 +283,7 @@ class Uploadr:
             api.method : "flickr.auth.getToken",
             api.frob : str(FLICKR[ api.frob ])
         }
-        sig = self.signCall( d )
-        url = urlGen(api.rest, d, sig)
+        url = urlGen(api.rest, d)
         try:
             res = getResponse(url)
             if isGood(res):
@@ -338,8 +336,7 @@ class Uploadr:
                 api.token  :  str(self.token) ,
                 api.method :  "flickr.auth.checkToken"
             }
-            sig = self.signCall( d )
-            url = urlGen(api.rest, d, sig)
+            url = urlGen(api.rest, d)
             try:
                 res = getResponse(url)
                 if isGood(res):
@@ -415,7 +412,7 @@ class Uploadr:
                 "is_friend" : str( FLICKR["is_friend"] ),
                 "is_family" : str( FLICKR["is_family"] )
             }
-            sig = self.signCall( d )
+            sig = signCall(d)
             d[ api.sig ] = sig
             d[ api.key ] = FLICKR[ api.key ]
             url = buildRequest(api.upload, d, (photo,))
