@@ -99,6 +99,52 @@ def reportError(res):
     logging.error(err)
     print err
 
+#
+# buildRequest/encodeMultipartFormdata code is from
+# http://www.voidspace.org.uk/atlantibots/pythonutils.html
+#
+def encodeMultipartFormdata(fields, files):
+    """ Encodes fields and files for uploading.
+    fields is a sequence of (name, value) elements for regular form fields - or a dictionary.
+    files is a sequence of (name, filename, value) elements for data to be uploaded as files.
+    Return (contenttype, body) ready for urllib2.Request instance
+    You can optionally pass in a boundary string to use or we'll let mimetools provide one.
+    """
+    boundary = '-----'+mimetools.choose_boundary()+'-----'
+    crlf = '\r\n'
+    L = []
+    if isinstance(fields, dict):
+        fields = fields.items()
+    for (key, value) in fields:
+        L.append('--' + boundary)
+        L.append('Content-Disposition: form-data; name="%s"' % key)
+        L.append('')
+        L.append(value)
+    for (key, filename, value) in files:
+        filetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+        L.append('--' + boundary)
+        L.append('Content-Disposition: form-data; name="%s"; filename="%s"' % (key, filename))
+        L.append('Content-Type: %s' % filetype)
+        L.append('')
+        L.append(value)
+    L.append('--' + boundary + '--')
+    L.append('')
+    body = crlf.join(L)
+    contenttype = 'multipart/form-data; boundary=%s' % boundary
+    return contenttype, body
+
+def buildRequest(theurl, fields, files):
+    """
+    Given the fields to set and the files to encode it returns a fully formed urllib2.Request object.
+    You can optionally pass in additional headers to encode into the opject. (Content-type and Content-length will be overridden if they are set).
+    fields is a sequence of (name, value) elements for regular form fields - or a dictionary.
+    files is a sequence of (name, filename, value) elements for data to be uploaded as files.
+    """
+    contenttype, body = encodeMultipartFormdata(fields, files)
+    txheaders = {}
+    txheaders['Content-type'] = contenttype
+    txheaders['Content-length'] = str(len(body))
+    return urllib2.Request(theurl, body, txheaders)
 
 class APIConstants:
     base = "http://flickr.com/services/"
@@ -372,7 +418,7 @@ class Uploadr:
             sig = self.signCall( d )
             d[ api.sig ] = sig
             d[ api.key ] = FLICKR[ api.key ]
-            url = self.buildRequest(api.upload, d, (photo,))
+            url = buildRequest(api.upload, d, (photo,))
             res = getResponse(url)
             if isGood(res):
                 logging.debug( "successful.")
@@ -402,54 +448,6 @@ class Uploadr:
         self.uploaded[ photoID ] = imageName
         self.uploaded.close()
         self.uploaded = shelve.open( HISTORY_FILE )
-
-    #
-    # buildRequest/encodeMultipartFormdata code is from www.voidspace.org.uk/atlantibots/pythonutils.html
-    #
-    def buildRequest(self, theurl, fields, files, txheaders=None):
-        """
-        Given the fields to set and the files to encode it returns a fully formed urllib2.Request object.
-        You can optionally pass in additional headers to encode into the opject. (Content-type and Content-length will be overridden if they are set).
-        fields is a sequence of (name, value) elements for regular form fields - or a dictionary.
-        files is a sequence of (name, filename, value) elements for data to be uploaded as files.
-        """
-        contenttype, body = self.encodeMultipartFormdata(fields, files)
-        if not txheaders:
-            txheaders = {}
-        txheaders['Content-type'] = contenttype
-        txheaders['Content-length'] = str(len(body))
-
-        return urllib2.Request(theurl, body, txheaders)
-
-    def encodeMultipartFormdata(self, fields, files):
-        """ Encodes fields and files for uploading.
-        fields is a sequence of (name, value) elements for regular form fields - or a dictionary.
-        files is a sequence of (name, filename, value) elements for data to be uploaded as files.
-        Return (contenttype, body) ready for urllib2.Request instance
-        You can optionally pass in a boundary string to use or we'll let mimetools provide one.
-        """
-        boundary = '-----'+mimetools.choose_boundary()+'-----'
-        crlf = '\r\n'
-        L = []
-        if isinstance(fields, dict):
-            fields = fields.items()
-        for (key, value) in fields:
-            L.append('--' + boundary)
-            L.append('Content-Disposition: form-data; name="%s"' % key)
-            L.append('')
-            L.append(value)
-        for (key, filename, value) in files:
-            filetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-            L.append('--' + boundary)
-            L.append('Content-Disposition: form-data; name="%s"; filename="%s"' % (key, filename))
-            L.append('Content-Type: %s' % filetype)
-            L.append('')
-            L.append(value)
-        L.append('--' + boundary + '--')
-        L.append('')
-        body = crlf.join(L)
-        contenttype = 'multipart/form-data; boundary=%s' % boundary
-        return contenttype, body
 
 def grabNewImages():
     """
