@@ -19,11 +19,12 @@ You may use this code however you see fit in any form whatsoever.
 2009 Peter Kolarov  -  Updated with fixes and new functionality
 """
 
-import logging
 from hashlib import md5
+import logging
 import mimetools
 import mimetypes
 import os
+import re
 import shelve
 import sys
 import urllib2
@@ -386,11 +387,9 @@ class Uploadr:
             # used as TAG separator by flickr
 
             # this is needed for later syncing flickr with folders
-            realTags  = os.path.dirname(folderTag).replace('\\',' ')   # look for / or \ or _ or .  and replace them with SPACE to make real Tags
-            realTags =  realTags.replace('/',' ')   # these will be the real tags ripped from folders
-            realTags =  realTags.replace('_',' ')
-            realTags =  realTags.replace('.',' ')
-            realTags = realTags.strip()
+            # look for / \ _ . and replace them with SPACE to make real Tags
+            realTags = re.sub(r'[/\\_.]', ' ',
+                          os.path.dirname(folderTag)).strip()
 
             if configdict.get('full_folder_tags', 'false').startswith('true'):
                 realTags = os.path.dirname(folderTag).split(os.sep)
@@ -401,9 +400,12 @@ class Uploadr:
             if exiftags == {}:
                 logging.debug('NO_EXIF_HEADER for %s', image)
             else:
-                if XPKEYWORDS in exiftags:  #look for additional tags in EXIF to tag picture with
-                    if len(exiftags[XPKEYWORDS].printable) > 4:
-                        picTags += exif.make_string( eval(exiftags[XPKEYWORDS].printable)).replace(';',' ')
+                # look for additional tags in EXIF to tag picture with
+                if XPKEYWORDS in exiftags:
+                    printable = exiftags[XPKEYWORDS].printable
+                    if len(printable) > 4:
+                        exifstring = exif.make_string(eval(printable))
+                        picTags += exifstring.replace(';', ' ')
 
             picTags = picTags.strip()
             logging.info("Uploading image %s with tags %s", image, picTags)
