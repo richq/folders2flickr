@@ -92,6 +92,9 @@ def getResponse(url):
     return data.rsp
 
 def reportError(res):
+    """
+    logs the error from the xml result and prints it too
+    """
     try:
         err = "Error:", str( res.err.code + " " + res.err.msg )
     except AttributeError:
