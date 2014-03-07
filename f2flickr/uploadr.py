@@ -165,6 +165,16 @@ class APIConstants:
 
 api = APIConstants()
 
+def urlGen(base, data, sig):
+    """
+    Creates the url from the template
+    base/?key=value...&api_key=key&api_sig=sig
+    """
+    data[api.key] = FLICKR[api.key]
+    data[api.sig] = sig
+    query = '&'.join(key+'='+value for key, value in data.iteritems())
+    return base + "?" + query
+
 class Uploadr:
     token = None
     perms = ""
@@ -190,16 +200,6 @@ class Uploadr:
         #f = api.key + FLICKR[ api.key ] + foo
         return md5.new( f ).hexdigest()
 
-    def urlGen(self, base, data, sig):
-        foo = base + "?"
-        for d in data:
-            foo += d + "=" + data[d] + "&"
-        return foo + api.key + "=" + FLICKR[ api.key ] + "&" + api.sig + "=" + sig
-
-
-    #
-    #   Authenticate user so we can upload images
-    #
     def authenticate( self ):
         """
         Authenticate user so we can upload images
@@ -227,7 +227,7 @@ class Uploadr:
             api.method  : "flickr.auth.getFrob"
             }
         sig = self.signCall( d )
-        url = self.urlGen( api.rest, d, sig )
+        url = urlGen(api.rest, d, sig)
         try:
             response = getResponse(url)
             if isGood(response):
@@ -247,7 +247,7 @@ class Uploadr:
             api.perms : "delete"
             }
         sig = self.signCall( d )
-        url = self.urlGen( api.auth, d, sig )
+        url = urlGen(api.auth, d, sig)
         ans = ""
         try:
             webbrowser.open( url )
@@ -285,7 +285,7 @@ class Uploadr:
             api.frob : str(FLICKR[ api.frob ])
         }
         sig = self.signCall( d )
-        url = self.urlGen( api.rest, d, sig )
+        url = urlGen(api.rest, d, sig)
         try:
             res = getResponse(url)
             if isGood(res):
@@ -339,7 +339,7 @@ class Uploadr:
                 api.method :  "flickr.auth.checkToken"
             }
             sig = self.signCall( d )
-            url = self.urlGen( api.rest, d, sig )
+            url = urlGen(api.rest, d, sig)
             try:
                 res = getResponse(url)
                 if isGood(res):
