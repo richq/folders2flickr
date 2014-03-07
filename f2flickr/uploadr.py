@@ -211,19 +211,19 @@ class Uploadr:
         self.getToken()
         self.cacheToken()
 
-    """
-    flickr.auth.getFrob
-
-    Returns a frob to be used during authentication. This method call must be
-    signed.
-
-    This method does not require authentication.
-    Arguments
-
-    api.key (Required)
-    Your API application key. See here for more details.
-    """
     def getFrob( self ):
+        """
+        flickr.auth.getFrob
+
+        Returns a frob to be used during authentication. This method call must be
+        signed.
+
+        This method does not require authentication.
+        Arguments
+
+        api.key (Required)
+        Your API application key. See here for more details.
+        """
         d = {
             api.method  : "flickr.auth.getFrob"
             }
@@ -238,10 +238,10 @@ class Uploadr:
             print "Error getting frob:" , str( sys.exc_info() )
             logging.error(sys.exc_info())
 
-    """
-    Checks to see if the user has authenticated this application
-    """
     def getAuthKey( self ):
+        """
+        Checks to see if the user has authenticated this application
+        """
         d =  {
             api.frob : FLICKR[ api.frob ],
             api.perms : "delete"
@@ -259,26 +259,26 @@ class Uploadr:
             print "After you have allowed access restart uploadr.py"
             sys.exit()
 
-    """
-    http://www.flickr.com/services/api/flickr.auth.getToken.html
-
-    flickr.auth.getToken
-
-    Returns the auth token for the given frob, if one has been attached. This method call must be signed.
-    Authentication
-
-    This method does not require authentication.
-    Arguments
-
-    NTC: We need to store the token in a file so we can get it and then check it insted of
-    getting a new on all the time.
-
-    api.key (Required)
-       Your API application key. See here for more details.
-    frob (Required)
-       The frob to check.
-    """
     def getToken( self ):
+        """
+        http://www.flickr.com/services/api/flickr.auth.getToken.html
+
+        flickr.auth.getToken
+
+        Returns the auth token for the given frob, if one has been attached. This method call must be signed.
+        Authentication
+
+        This method does not require authentication.
+        Arguments
+
+        NTC: We need to store the token in a file so we can get it and then check it insted of
+        getting a new on all the time.
+
+        api.key (Required)
+           Your API application key. See here for more details.
+        frob (Required)
+           The frob to check.
+        """
         d = {
             api.method : "flickr.auth.getToken",
             api.frob : str(FLICKR[ api.frob ])
@@ -296,16 +296,14 @@ class Uploadr:
             print str( sys.exc_info() )
             logging.error(sys.exc_info())
 
-    """
-    Attempts to get the flickr token from disk.
-    """
     def getCachedToken( self ):
+        """
+        Attempts to get the flickr token from disk.
+        """
         if ( os.path.exists( self.TOKEN_FILE )):
             return open( self.TOKEN_FILE ).read()
         else :
             return None
-
-
 
     def cacheToken( self ):
         try:
@@ -314,44 +312,47 @@ class Uploadr:
             print "Issue writing token to local cache " , str(sys.exc_info())
             logging.error(sys.exc_info())
 
-    """
-    flickr.auth.checkToken
-
-    Returns the credentials attached to an authentication token.
-    Authentication
-
-    This method does not require authentication.
-    Arguments
-
-    api.key (Required)
-        Your API application key. See here for more details.
-    auth_token (Required)
-        The authentication token to check.
-    """
     def checkToken( self ):
+        """
+        flickr.auth.checkToken
+
+        Returns the credentials attached to an authentication token.
+        Authentication
+
+        This method does not require authentication.
+        Arguments
+
+        api.key (Required)
+            Your API application key. See here for more details.
+        auth_token (Required)
+            The authentication token to check.
+        """
         if ( self.token == None ):
             return False
-        else :
-            d = {
-                api.token  :  str(self.token) ,
-                api.method :  "flickr.auth.checkToken"
-            }
-            url = urlGen(api.rest, d)
-            try:
-                res = getResponse(url)
-                if isGood(res):
-                    self.token = str(res.auth.token.text)
-                    self.perms = str(res.auth.perms.text)
-                    return True
-                else :
-                    reportError(res)
-            except:
-                print str( sys.exc_info() )
-                logging.error(sys.exc_info())
-            return False
+        d = {
+            api.token  :  str(self.token) ,
+            api.method :  "flickr.auth.checkToken"
+        }
+        url = urlGen(api.rest, d)
+        try:
+            res = getResponse(url)
+            if isGood(res):
+                self.token = str(res.auth.token.text)
+                self.perms = str(res.auth.perms.text)
+                return True
+            else :
+                reportError(res)
+        except:
+            print str( sys.exc_info() )
+            logging.error(sys.exc_info())
+        return False
 
 
     def upload( self, newImages ):
+        """
+        A generator to upload all of the files in newImages, and
+        return the uploaded files one-by-one.
+        """
         self.uploaded = shelve.open( HISTORY_FILE )
         for image in newImages:
             up = self.uploadImage( image )
@@ -362,6 +363,9 @@ class Uploadr:
                 break
 
     def uploadImage( self, image ):
+        """
+        Upload a single image. Returns the photoid, or None on failure.
+        """
         folderTag = image[len(IMAGE_DIR):]
 
         if self.uploaded.has_key(folderTag):
