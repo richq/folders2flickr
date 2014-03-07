@@ -428,7 +428,7 @@ class Uploadr:
             else :
                 print "problem.."
                 reportError(res)
-        except KeyboardInterrupt, ex:
+        except KeyboardInterrupt:
             logging.debug("Keyboard interrupt seen, abandon uploads")
             print "Stopping uploads..."
             self.abandonUploads = True
