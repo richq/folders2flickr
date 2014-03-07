@@ -20,7 +20,7 @@ You may use this code however you see fit in any form whatsoever.
 """
 
 import logging
-import md5
+from hashlib import md5
 import mimetools
 import mimetypes
 import os
@@ -177,7 +177,7 @@ def signCall(data):
         args += (key + data[key])
 
     tohash = FLICKR[ api.secret ] + api.key + FLICKR[ api.key ] + args
-    return md5.new(tohash).hexdigest()
+    return md5(tohash).hexdigest()
 
 
 def urlGen(base, data):
