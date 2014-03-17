@@ -21,6 +21,7 @@ You may use this code however you see fit in any form whatsoever.
 
 from hashlib import md5
 import logging
+import glob
 import mimetools
 import mimetypes
 import os
@@ -455,16 +456,45 @@ class Uploadr:
         self.uploaded.close()
         self.uploaded = shelve.open( HISTORY_FILE )
 
-def grabNewImages():
+def parseIgnore(contents):
+    """
+    Parse the lines in the ignore file.
+    special case if it's empty, then just match everything.
+    """
+    if not contents:
+        return ['*']
+    result = []
+    for line in contents:
+        result.append(line.strip())
+    return result
+
+def ignoreMatch(name, patterns):
+    """
+    Return if name matches any of the ignore patterns.
+    """
+    for pat in patterns:
+        if glob.fnmatch.fnmatch(name, pat):
+            return True
+    return False
+
+def grabNewImages(dirname):
     """
     get all images in folders and subfolders which match extensions below
     """
     images = []
-    for dirpath, dirnames, filenames in os.walk(IMAGE_DIR, topdown=True):
-        dirnames[:] = [d for d in dirnames if not d[0] == '.']
-        for f in filenames :
+    for dirpath, dirnames, filenames in os.walk(dirname, topdown=True):
+        ignore = '.f2fignore' in filenames
+        # use os.stat here
+        ignoreglobs = []
+        if ignore:
+            fp = open(os.path.normpath(os.path.join(dirpath, '.f2fignore')))
+            ignoreglobs = parseIgnore(fp.readlines())
+            fp.close()
+        dirnames[:] = [d for d in dirnames if not d[0] == '.'
+                       and not ignoreMatch(d, ignoreglobs)]
+        for f in filenames:
             ext = f.lower().split(".")[-1]
-            if ext in ALLOWED_EXT:
+            if ext in ALLOWED_EXT and not ignoreMatch(f, ignoreglobs):
                 images.append(os.path.normpath(os.path.join(dirpath, f)))
     images.sort()
     return images
@@ -491,7 +521,7 @@ def main():
     if not uploadinstance.checkToken():
         uploadinstance.authenticate()
 
-    images = grabNewImages()
+    images = grabNewImages(IMAGE_DIR)
     logging.debug("Uploading images: %s", str(images))
 
     #uploads all images that are in folders and not in history file

@@ -41,12 +41,35 @@ As an alternative, you can also use [pip](http://www.pip-installer.org).
 
     pip install --user git+https://github.com/richq/folders2flickr.git
 
-This will create `~/.local/bin/folders2flickr` and install the library to the right place in `.local`. 
+This will create `~/.local/bin/folders2flickr` and install the library to the right place in `.local`.
 The sample configuration file can be created like this:
 
     cp ~/.local/share/folders2flickr/uploadr.ini.sample ~/.uploadr.ini
     sensible-editor ~/.uploadr.ini
     # modify 'imagedir', etc.
+
+## WHAT IS UPLOADED
+
+The photos and videos in the directory given in the uploadr.ini file are
+eventually uploaded to flickr and placed into sets. Only files with the
+extensions jpg, gif, png, avi and mov are uploaded, and flickr may reject them
+if they are not in the correct format.
+
+If you add the empty file `.f2fignore` to a directory then all files in that
+directory and any subdirectories will be ignored (not uploaded).
+
+If the file has any contents then files that match the glob patterns listed are
+ignored. One pattern or filename per line, and subdirectories are also ignored
+if they match the pattern. For example, to ignore the file `MVI_3847.AVI` you
+can either specify the file exactly:
+
+    MVI_3847.AVI
+
+or you could add a pattern to the ignore file:
+
+    MVI_*.AVI
+
+The pattern is case sensitive and uses Python's [fnmatch](http://docs.python.org/2/library/fnmatch.html).
 
 ## RUNTIME DATA FILES
 

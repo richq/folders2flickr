@@ -3,7 +3,11 @@
 import os
 import sys, subprocess
 
-errno = subprocess.call([sys.executable, 'test/test_tags2set.py'])
-if errno:
-    raise SystemExit(errno)
+for test in '''
+test/test_tags2set.py
+test/test_uploadr.py
+'''.split():
+    errno = subprocess.call([sys.executable, test])
+    if errno:
+        raise SystemExit(errno)
 
