@@ -461,8 +461,6 @@ def parseIgnore(contents):
     Parse the lines in the ignore file.
     special case if it's empty, then just match everything.
     """
-    if not contents:
-        return ['*']
     result = []
     for line in contents:
         result.append(line.strip())

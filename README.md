@@ -55,12 +55,13 @@ eventually uploaded to flickr and placed into sets. Only files with the
 extensions jpg, gif, png, avi and mov are uploaded, and flickr may reject them
 if they are not in the correct format.
 
-If you add the empty file `.f2fignore` to a directory then all files in that
-directory and any subdirectories will be ignored (not uploaded).
+If you add the file `.f2fignore` to a directory then it can be used to ignore
+files and subdirectories.  Ignored files will not be uploaded, and the script
+will not descend into ignored subdirectories.
 
-If the file has any contents then files that match the glob patterns listed are
-ignored. One pattern or filename per line, and subdirectories are also ignored
-if they match the pattern. For example, to ignore the file `MVI_3847.AVI` you
+The contents of the `.f2fignore` file is a series of glob patterns,
+one pattern or filename per line. Subdirectories are also ignored if they
+match the pattern. For example, to ignore the file `MVI_3847.AVI` you
 can either specify the file exactly:
 
     MVI_3847.AVI

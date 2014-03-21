@@ -21,11 +21,7 @@ class UploadrTest(unittest.TestCase):
     def tearDown(self):
         os.unlink('uploadr.ini')
 
-    def testFindFiles(self):
-        """
-        Check find files
-        """
-        import f2flickr.uploadr
+    def createDirs(self):
         tempdir = tempfile.mkdtemp()
         os.mkdir(os.path.join(tempdir, 'holidays'))
         os.mkdir(os.path.join(tempdir, 'holidays', 'family'))
@@ -34,13 +30,33 @@ class UploadrTest(unittest.TestCase):
         for i in range(1, 4):
             tmpfile = open(os.path.join(tempdir, 'holidays', 'family', 'img%d.jpg'%i), 'w')
             tmpfile.close()
-        tmpfile = open(os.path.join(tempdir, 'secret', '.f2fignore'), 'w')
-        tmpfile.close()
         tmpfile = open(os.path.join(tempdir, 'secret', 'img1.jpg'), 'w')
         tmpfile.close()
         for i in range(1, 4):
             tmpfile = open(os.path.join(tempdir, 'secret', 'documents', 'img%d.jpg'%i), 'w')
             tmpfile.close()
+        return tempdir
+
+    def testFindFilesEmpty(self):
+        """
+        Check find files when .f2fignore is empty does nothing
+        """
+        import f2flickr.uploadr
+        tempdir = self.createDirs()
+        tmpfile = open(os.path.join(tempdir, 'secret', '.f2fignore'), 'w')
+        tmpfile.close()
+        images = sorted(f2flickr.uploadr.grabNewImages(tempdir))
+        self.assertEquals(7, len(images))
+
+    def testFindFilesStar(self):
+        """
+        Check find files when .f2fignore has a single *
+        """
+        import f2flickr.uploadr
+        tempdir = self.createDirs()
+        tmpfile = open(os.path.join(tempdir, 'secret', '.f2fignore'), 'w')
+        tmpfile.write('*\n')
+        tmpfile.close()
         images = sorted(f2flickr.uploadr.grabNewImages(tempdir))
         self.assertEquals(3, len(images))
 
