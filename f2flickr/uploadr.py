@@ -29,8 +29,8 @@ import shelve
 import sys
 import urllib2
 import webbrowser
+import exifread
 
-import f2flickr.exif as exif
 import f2flickr.flickr as flickr
 import f2flickr.tags2set as tags2set
 from f2flickr.configuration import configdict
@@ -378,7 +378,7 @@ class Uploadr:
         try:
             logging.debug("Getting EXIF for %s", image)
             f = open(image, 'rb')
-            exiftags = exif.process_file(f)
+            exiftags = exifread.process_file(f)
             f.close()
             #print exiftags[XPKEYWORDS]
             #print folderTag
