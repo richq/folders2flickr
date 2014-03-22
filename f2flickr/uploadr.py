@@ -404,7 +404,7 @@ class Uploadr:
                 if XPKEYWORDS in exiftags:
                     printable = exiftags[XPKEYWORDS].printable
                     if len(printable) > 4:
-                        exifstring = exif.make_string(eval(printable))
+                        exifstring = exifread.make_string(eval(printable))
                         picTags += exifstring.replace(';', ' ')
 
             picTags = picTags.strip()
