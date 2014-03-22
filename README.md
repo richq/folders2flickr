@@ -24,7 +24,20 @@ So keep the database it creates in a safe place!
 
 ## INSTALLATION
 
-The easiest way is to just make a local clone of the repository
+The easiest way is to use [pip](http://www.pip-installer.org).
+
+    pip install --user git+https://github.com/richq/folders2flickr.git
+
+This will create `~/.local/bin/folders2flickr` and install the library to the right place in `.local`.
+The sample configuration file can be created like this:
+
+    cp ~/.local/share/folders2flickr/uploadr.ini.sample ~/.uploadr.ini
+    sensible-editor ~/.uploadr.ini
+    # modify 'imagedir', etc.
+
+If you want to use a local clone of the repository then please be aware that
+folders2flickr depends on the [python-exif](https://github.com/ianare/exif-py)
+package. Once you have installed that package, create a clone of folders2flickr using git:
 
     git clone https://github.com/richq/folders2flickr.git
 
@@ -34,19 +47,10 @@ Then you will need to configure the directories to use:
     sensible-editor uploadr.ini
     # modify at least 'imagedir' to point to the location of new images
 
-I try to keep the master branch usable and for now there are no external
-dependencies, so this should be fine.
-
-As an alternative, you can also use [pip](http://www.pip-installer.org).
-
-    pip install --user git+https://github.com/richq/folders2flickr.git
-
-This will create `~/.local/bin/folders2flickr` and install the library to the right place in `.local`. 
-The sample configuration file can be created like this:
-
-    cp ~/.local/share/folders2flickr/uploadr.ini.sample ~/.uploadr.ini
-    sensible-editor ~/.uploadr.ini
-    # modify 'imagedir', etc.
+I try to keep the master branch usable, but there are point releases if you
+prefer a stable fixed version. To install a release, download the zip file,
+unpack it and away you go. The python-exif dependency will be included in these
+zips.
 
 ## RUNTIME DATA FILES
 
