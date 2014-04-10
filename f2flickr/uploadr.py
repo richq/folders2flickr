@@ -379,7 +379,10 @@ class Uploadr:
         try:
             logging.debug("Getting EXIF for %s", image)
             f = open(image, 'rb')
-            exiftags = exifread.process_file(f)
+            try:
+                exiftags = exifread.process_file(f)
+            except MemoryError:
+                exiftags = {}
             f.close()
             #print exiftags[XPKEYWORDS]
             #print folderTag
