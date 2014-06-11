@@ -152,10 +152,10 @@ def buildRequest(theurl, fields, files):
     return urllib2.Request(theurl, body, txheaders)
 
 class APIConstants:
-    base = "http://flickr.com/services/"
+    base = "https://flickr.com/services/"
     rest   = base + "rest/"
     auth   = base + "auth/"
-    upload = base + "upload/"
+    upload = "https://up.flickr.com/services/upload/"
 
     token = "auth_token"
     secret = "secret"
