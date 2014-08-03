@@ -483,7 +483,7 @@ def grabNewImages(dirname):
     get all images in folders and subfolders which match extensions below
     """
     images = []
-    for dirpath, dirnames, filenames in os.walk(dirname, topdown=True):
+    for dirpath, dirnames, filenames in os.walk(dirname, topdown=True, followlinks=True):
         ignore = '.f2fignore' in filenames
         # use os.stat here
         ignoreglobs = []
@@ -493,7 +493,7 @@ def grabNewImages(dirname):
             fp.close()
         dirnames[:] = [d for d in dirnames if not d[0] == '.'
                        and not ignoreMatch(d, ignoreglobs)]
-        for f in filenames:
+        for f in (fn for fn in filenames if not fn.startswith('.')):
             ext = f.lower().split(".")[-1]
             if ext in ALLOWED_EXT and not ignoreMatch(f, ignoreglobs):
                 images.append(os.path.normpath(os.path.join(dirpath, f)))
