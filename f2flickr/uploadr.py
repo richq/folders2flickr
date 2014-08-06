@@ -493,7 +493,9 @@ def grabNewImages(dirname):
             fp.close()
         dirnames[:] = [d for d in dirnames if not d[0] == '.'
                        and not ignoreMatch(d, ignoreglobs)]
-        for f in (fn for fn in filenames if not fn.startswith('.')):
+        for f in filenames:
+            if f.startswith('.'):
+                continue
             ext = f.lower().split(".")[-1]
             if ext in ALLOWED_EXT and not ignoreMatch(f, ignoreglobs):
                 images.append(os.path.normpath(os.path.join(dirpath, f)))
