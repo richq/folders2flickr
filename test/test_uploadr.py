@@ -98,6 +98,21 @@ class UploadrTest(unittest.TestCase):
         images = sorted(f2flickr.uploadr.grabNewImages(tempdir))
         self.assertEquals(3, len(images))
 
+    def testFindFilesIgnoreHidden(self):
+        """
+        Check find files
+        """
+        import f2flickr.uploadr
+        tempdir = tempfile.mkdtemp()
+        os.mkdir(os.path.join(tempdir, 'contains_dots'))
+        for i in range(1, 4):
+            tmpfile = open(os.path.join(tempdir, 'contains_dots', 'img%d.jpg'%i), 'w')
+            tmpfile.close()
+        tmpfile = open(os.path.join(tempdir, 'contains_dots', '.big.avi'), 'w')
+        tmpfile.close()
+        images = sorted(f2flickr.uploadr.grabNewImages(tempdir))
+        self.assertEquals(3, len(images))
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(levelname)s %(message)s',
