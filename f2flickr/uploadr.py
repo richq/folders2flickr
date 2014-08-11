@@ -376,6 +376,7 @@ class Uploadr:
             if self.abandonUploads:
                 # the idea here is ctrl-c in the middle will still create sets
                 break
+        self.uploaded.close()
 
     def uploadImage( self, image ):
         """
@@ -432,7 +433,7 @@ class Uploadr:
                 realTags = os.path.dirname(folderTag).split(os.sep)
                 realTags = (' '.join('"' + item + '"' for item in  realTags))
 
-            picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
+            picTags = '"#' + folderTag + '" ' + realTags
 
             #check if we need to override photo dates
             if configdict.get('override_dates', '0') == '1':
@@ -662,8 +663,10 @@ def main():
         for uploaded in uploadinstance.upload(group):
             uploadedNow.append(uploaded)
         if len(uploadedNow) > 0:
+            uploadinstance.uploaded.close()
             tags2set.createSets(uploadedNow, HISTORY_FILE)
             uploadedNow = []
+            uploadinstance.uploaded = shelve.open( HISTORY_FILE )
         if uploadinstance.abandonUploads==True:
             break
 
