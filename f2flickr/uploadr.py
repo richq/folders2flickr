@@ -66,6 +66,7 @@ jpg
 gif
 png
 avi
+mp4
 mov
 '''.split())
 
