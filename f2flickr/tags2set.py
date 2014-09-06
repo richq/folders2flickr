@@ -110,7 +110,9 @@ def createSets(uploadedNow, historyFile):
 
         if (not lastSetName == setName and not lastSetName == ''):
             #new set is starting so save last
-            _creatSet(photoSet, lastSetName, existingSets)
+            newset = _creatSet(photoSet, lastSetName, existingSets)
+            if newset:
+                existingSets.append(newset)
             createdSets.add(lastSetName)
             photoSet = []
         logging.debug("tags2set: Adding image %s", image)

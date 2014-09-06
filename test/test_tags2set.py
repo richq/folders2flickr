@@ -10,6 +10,17 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 import fakeflickr
 import shelve
 
+def setSubsetsTrue():
+    tmp = open('uploadr.ini', 'r')
+    lines = tmp.readlines()
+    tmp.close()
+    tmp = open('uploadr.ini', 'w')
+    for line in lines:
+        if line.startswith('only_sub_sets'):
+            line = line.replace('false', 'true')
+        tmp.write(line)
+    tmp.close()
+
 def addinvert(dictthing):
     """
     Add the keys and values, but inverted to the dictionary
@@ -104,21 +115,37 @@ class Tags2SetTest(unittest.TestCase):
         import f2flickr.tags2set
         import f2flickr.configuration
         uploaded, historyFile = self.createHistory()
-        tmp = open('uploadr.ini', 'r')
-        lines = tmp.readlines()
-        tmp.close()
-        tmp = open('uploadr.ini', 'w')
-        for line in lines:
-            if line.startswith('only_sub_sets'):
-                line = line.replace('false', 'true')
-            tmp.write(line)
-        tmp.close()
+        setSubsetsTrue()
         f2flickr.configuration.configdict = f2flickr.configuration.ConfigDict()
         f2flickr.tags2set.createSets(uploaded, historyFile)
         user = fakeflickr.fakelogin()
         self.assertEquals(1, len(user.getPhotosets()))
         ps = user.getPhotosets()[0]
         self.assertEquals('Crete', ps.title)
+
+    def testIssue35(self):
+        """
+        Create 2 simple sets, shouldn't create 3
+        """
+        import f2flickr.tags2set
+        historyFile = tempfile.mktemp()
+        fakeuploaded = shelve.open(historyFile)
+        setSubsetsTrue()
+        fakeuploaded['archive1/Sterwart Park, Perth/IMG_7872.JPG'] = '15134361666'
+        fakeuploaded['archive1/Quebec City, Sept 2005/IMG_7877.JPG'] = '15154414551'
+        fakeuploaded['archive1/Quebec City, Sept 2005/IMG_7876.JPG'] = '14970716900'
+        fakeuploaded['archive1/Sterwart Park, Perth/IMG_7873.JPG'] =  '14970824597'
+
+        addinvert(fakeuploaded)
+        fakeuploaded.close()
+
+        uploaded = ['15134361666', '15154414551', '14970716900', '14970824597']
+
+        f2flickr.tags2set.createSets(uploaded, historyFile)
+        user = fakeflickr.fakelogin()
+        self.assertEquals(2, len(user.getPhotosets()))
+
+        os.remove(historyFile)
 
 
 if __name__ == '__main__':

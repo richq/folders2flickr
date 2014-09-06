@@ -16,7 +16,7 @@ class FakeUser(object):
         self._photosets = []
 
     def getPhotosets(self):
-        return self._photosets
+        return [s for s in self._photosets]
 
     def addPhotosetInternal(self, ps):
         self._photosets.append(ps)
