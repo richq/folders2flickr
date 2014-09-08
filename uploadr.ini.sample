@@ -33,6 +33,20 @@ only_sub_sets  = false
 full_folder_tags = false
 
 #
+# Override Flickr Dates. Let Flickr figure out dates, or override them after image upload
+# date_taken is usually taken from EXIF
+# date_posted is usually the UNIX timestamp of the upload datetime
+# override_dates: 0=NO (default), 1=YES
+# date_taken_type: 0: default (let Flickr choose), 1 use EXIF date, 2 fixed date
+# date_posted_type: 0: default (let Flickr choose), 1 use EXIF date, 2 fixed date
+# date_taken_fixed:  mysql format date e.g. 2010-01-31 13:04:05
+# date_posted_fixed: UNIX timestamp e.g. 14960583869
+# date_taken_granularity: 0=Y-m-d H:i:s (default), 4=Y-m, 6=Y, 8=Circa
+# date_posted_granularity: 0=Y-m-d H:i:s (default), 4=Y-m-31 23:59:59, 6=Y-12-31 23:59:59
+# date_posted_utc: GMT zone (Flickr defaults to UTC). Number of hours to be subtracted for obtaining an UTC timestamp from EXIF or fixed date_posted, e.g. +1 or 1 or -6
+override_dates = 0
+
+#
 # Key and Hash codes. Use those established by the original folders2flicker author (default below)
 # or alternately request your own from Flickr.
 #

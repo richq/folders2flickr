@@ -31,6 +31,8 @@ import sys
 import urllib2
 import webbrowser
 import exifread
+import string
+from datetime import timedelta, datetime, time, date, tzinfo
 
 import f2flickr.flickr as flickr
 import f2flickr.tags2set as tags2set
@@ -402,9 +404,44 @@ class Uploadr:
 
             picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
 
+	    #check if we need to override photo dates
+	    if configdict.get('override_dates', '0') == '1':
+		dateTaken = datePosted = ''
+		dateTakenGranularity = configdict.get('date_taken_granularity', '0')
+		#fixed take date
+		if configdict.get('date_taken_type', '0') == '2':
+			datePosted = configdict.get('date_posted_fixed', '')
+		#fixed post date
+		if configdict.get('date_posted_type', '0') == '2':
+			datePosted = configdict.get('date_posted_fixed', '')
+			#convert timestamp to GMT zone
+			dateZone =  configdict.get('date_posted_utc', '0')
+			if dateZone != '0':
+				datePosted = datePosted - int(dateZone)*3600
+			#TODO
+			#if configdict.get('date_posted_granularity', '0') == '4':
+			#if configdict.get('date_posted_granularity', '0') == '6':
+
             if exiftags == {}:
                 logging.debug('NO_EXIF_HEADER for %s', image)
             else:
+		if configdict.get('override_dates', '0') == '1':
+			if 'EXIF DateTimeDigitized' in exiftags:
+				dateExif = str(exiftags['EXIF DateTimeDigitized'])
+				dateExif = dateExif[0:10].replace(':', '-') + dateExif[10:]
+				dateUnix = int((datetime(int(dateExif[0:4]), int(dateExif[5:7]), int(dateExif[8:10]), int(dateExif[11:13]), int(dateExif[14:16]), int(dateExif[17:19])) - datetime(1970, 1, 1)).total_seconds())
+				if configdict.get('date_taken_type', '0') == '1':
+					dateTaken = dateExif
+				if configdict.get('date_posted_type', '0') == '1':
+					datePosted = dateUnix
+					#convert timestamp to GMT zone
+					dateZone =  configdict.get('date_posted_utc', '0')
+					if dateZone != '0':
+						datePosted = datePosted - int(dateZone)*3600
+					#TODO
+					#if configdict.get('date_posted_granularity', '0') == '4':
+					#if configdict.get('date_posted_granularity', '0') == '6':
+
                 # look for additional tags in EXIF to tag picture with
                 if XPKEYWORDS in exiftags:
                     printable = exiftags[XPKEYWORDS].printable
@@ -435,6 +472,8 @@ class Uploadr:
                 logging.debug( "successful.")
                 photoid = str(res.photoid.text)
                 self.logUpload(photoid, folderTag)
+		if configdict.get('override_dates', '0') == '1':
+			self.overrideDates(image, photoid, datePosted, dateTaken, dateTakenGranularity)
                 return photoid
             else :
                 print "problem.."
@@ -459,6 +498,41 @@ class Uploadr:
         self.uploaded[ photoID ] = imageName
         self.uploaded.close()
         self.uploaded = shelve.open( HISTORY_FILE )
+
+    def overrideDates( self, image, photoID, datePosted, dateTaken, granularity ):
+        """
+        Change date_posted and date_taken parameter in an uploaded photo with Flickr granularities
+        0 Y-m-d H:i:s
+        4 Y-m
+        6 Y
+        8 Circa
+        """
+	try:
+            photoID = str( photoID )
+            logging.debug("Setting date_posted: %s and date_taken: %s for %s with id %s", str( datePosted ), str( dateTaken ), image, photoID)
+            d = {
+                api.token   : str(self.token),
+                api.method  : "flickr.photos.setDates",
+                "date_posted": str( datePosted ),
+                "date_taken": str( dateTaken ),
+                "date_taken_granularity" : str( granularity ),
+		"photo_id"  : photoID,
+            }
+            sig = signCall(d)
+            d[ api.sig ] = sig
+            d[ api.key ] = FLICKR[ api.key ]
+            url = buildRequest(api.rest, d, ())
+            res = getResponse(url)
+            if isGood(res):
+                logging.debug( "date setting successful.")
+                return
+            else :
+                print "problem.."
+                reportError(res)
+	except KeyboardInterrupt:
+            logging.debug("Keyboard interrupt seen, abandon uploads")
+            print "Stopping uploads..."
+
 
 def parseIgnore(contents):
     """
