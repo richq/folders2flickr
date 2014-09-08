@@ -33,6 +33,7 @@ import webbrowser
 import exifread
 import string
 from datetime import timedelta, datetime, time, date, tzinfo
+import calendar
 
 import f2flickr.flickr as flickr
 import f2flickr.tags2set as tags2set
@@ -414,13 +415,20 @@ class Uploadr:
 		#fixed post date
 		if configdict.get('date_posted_type', '0') == '2':
 			datePosted = configdict.get('date_posted_fixed', '')
-			#convert timestamp to GMT zone
+			#Use year and month from config ini, then calculate end of month (note: Flickr does not accept future dates. You'll get current date maximum)
+			if configdict.get('date_posted_granularity', '0') == '4':
+				datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+				datePostedM = int(datetime.fromtimestamp(datePosted).strftime("%m"))
+				datePostedD = calendar.monthrange(datePostedY, datePostedM)[1]
+				datePosted = int((datetime(datePostedY, datePostedM, datePostedD, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+			#Use year from config ini, then calculate end of year (note: Flickr does not accept future dates. You'll get current date maximum)
+			if configdict.get('date_posted_granularity', '0') == '6':
+				datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+				datePosted = int((datetime(datePostedY, 12, 31, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+			#Convert timestamp to GMT zone
 			dateZone =  configdict.get('date_posted_utc', '0')
 			if dateZone != '0':
 				datePosted = datePosted - int(dateZone)*3600
-			#TODO
-			#if configdict.get('date_posted_granularity', '0') == '4':
-			#if configdict.get('date_posted_granularity', '0') == '6':
 
             if exiftags == {}:
                 logging.debug('NO_EXIF_HEADER for %s', image)
@@ -434,13 +442,20 @@ class Uploadr:
 					dateTaken = dateExif
 				if configdict.get('date_posted_type', '0') == '1':
 					datePosted = dateUnix
-					#convert timestamp to GMT zone
+					#Use year and month from dateExif, then calculate end of month (note: Flickr does not accept future dates. You'll get current date maximum)
+					if configdict.get('date_posted_granularity', '0') == '4':
+						datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+						datePostedM = int(datetime.fromtimestamp(datePosted).strftime("%m"))
+						datePostedD = calendar.monthrange(datePostedY, datePostedM)[1]
+						datePosted = int((datetime(datePostedY, datePostedM, datePostedD, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+					#Use year from dateExif, then calculate end of year (note: Flickr does not accept future dates. You'll get current date maximum)
+					if configdict.get('date_posted_granularity', '0') == '6':
+						datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+						datePosted = int((datetime(datePostedY, 12, 31, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+					#Convert timestamp to GMT zone
 					dateZone =  configdict.get('date_posted_utc', '0')
 					if dateZone != '0':
 						datePosted = datePosted - int(dateZone)*3600
-					#TODO
-					#if configdict.get('date_posted_granularity', '0') == '4':
-					#if configdict.get('date_posted_granularity', '0') == '6':
 
                 # look for additional tags in EXIF to tag picture with
                 if XPKEYWORDS in exiftags:
