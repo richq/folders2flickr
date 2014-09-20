@@ -405,57 +405,57 @@ class Uploadr:
 
             picTags = '#' + folderTag.replace(' ','#') + ' ' + realTags
 
-	    #check if we need to override photo dates
-	    if configdict.get('override_dates', '0') == '1':
-		dateTaken = datePosted = ''
-		dateTakenGranularity = configdict.get('date_taken_granularity', '0')
-		#fixed take date
-		if configdict.get('date_taken_type', '0') == '2':
-			datePosted = configdict.get('date_posted_fixed', '')
-		#fixed post date
-		if configdict.get('date_posted_type', '0') == '2':
-			datePosted = configdict.get('date_posted_fixed', '')
-			#Use year and month from config ini, then calculate end of month (note: Flickr does not accept future dates. You'll get current date maximum)
-			if configdict.get('date_posted_granularity', '0') == '4':
-				datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
-				datePostedM = int(datetime.fromtimestamp(datePosted).strftime("%m"))
-				datePostedD = calendar.monthrange(datePostedY, datePostedM)[1]
-				datePosted = int((datetime(datePostedY, datePostedM, datePostedD, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
-			#Use year from config ini, then calculate end of year (note: Flickr does not accept future dates. You'll get current date maximum)
-			if configdict.get('date_posted_granularity', '0') == '6':
-				datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
-				datePosted = int((datetime(datePostedY, 12, 31, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
-			#Convert timestamp to GMT zone
-			dateZone =  configdict.get('date_posted_utc', '0')
-			if dateZone != '0':
-				datePosted = datePosted - int(dateZone)*3600
+            #check if we need to override photo dates
+            if configdict.get('override_dates', '0') == '1':
+                dateTaken = datePosted = ''
+                dateTakenGranularity = configdict.get('date_taken_granularity', '0')
+                #fixed take date
+                if configdict.get('date_taken_type', '0') == '2':
+                    datePosted = configdict.get('date_posted_fixed', '')
+                #fixed post date
+                if configdict.get('date_posted_type', '0') == '2':
+                    datePosted = configdict.get('date_posted_fixed', '')
+                    #Use year and month from config ini, then calculate end of month (note: Flickr does not accept future dates. You'll get current date maximum)
+                    if configdict.get('date_posted_granularity', '0') == '4':
+                        datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+                        datePostedM = int(datetime.fromtimestamp(datePosted).strftime("%m"))
+                        datePostedD = calendar.monthrange(datePostedY, datePostedM)[1]
+                        datePosted = int((datetime(datePostedY, datePostedM, datePostedD, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+                    #Use year from config ini, then calculate end of year (note: Flickr does not accept future dates. You'll get current date maximum)
+                    if configdict.get('date_posted_granularity', '0') == '6':
+                        datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+                        datePosted = int((datetime(datePostedY, 12, 31, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+                    #Convert timestamp to GMT zone
+                    dateZone =  configdict.get('date_posted_utc', '0')
+                    if dateZone != '0':
+                        datePosted = datePosted - int(dateZone)*3600
 
             if exiftags == {}:
                 logging.debug('NO_EXIF_HEADER for %s', image)
             else:
-		if configdict.get('override_dates', '0') == '1':
-			if 'EXIF DateTimeDigitized' in exiftags:
-				dateExif = str(exiftags['EXIF DateTimeDigitized'])
-				dateExif = dateExif[0:10].replace(':', '-') + dateExif[10:]
-				dateUnix = int((datetime(int(dateExif[0:4]), int(dateExif[5:7]), int(dateExif[8:10]), int(dateExif[11:13]), int(dateExif[14:16]), int(dateExif[17:19])) - datetime(1970, 1, 1)).total_seconds())
-				if configdict.get('date_taken_type', '0') == '1':
-					dateTaken = dateExif
-				if configdict.get('date_posted_type', '0') == '1':
-					datePosted = dateUnix
-					#Use year and month from dateExif, then calculate end of month (note: Flickr does not accept future dates. You'll get current date maximum)
-					if configdict.get('date_posted_granularity', '0') == '4':
-						datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
-						datePostedM = int(datetime.fromtimestamp(datePosted).strftime("%m"))
-						datePostedD = calendar.monthrange(datePostedY, datePostedM)[1]
-						datePosted = int((datetime(datePostedY, datePostedM, datePostedD, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
-					#Use year from dateExif, then calculate end of year (note: Flickr does not accept future dates. You'll get current date maximum)
-					if configdict.get('date_posted_granularity', '0') == '6':
-						datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
-						datePosted = int((datetime(datePostedY, 12, 31, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
-					#Convert timestamp to GMT zone
-					dateZone =  configdict.get('date_posted_utc', '0')
-					if dateZone != '0':
-						datePosted = datePosted - int(dateZone)*3600
+                if configdict.get('override_dates', '0') == '1':
+                    if 'EXIF DateTimeDigitized' in exiftags:
+                        dateExif = str(exiftags['EXIF DateTimeDigitized'])
+                        dateExif = dateExif[0:10].replace(':', '-') + dateExif[10:]
+                        dateUnix = int((datetime(int(dateExif[0:4]), int(dateExif[5:7]), int(dateExif[8:10]), int(dateExif[11:13]), int(dateExif[14:16]), int(dateExif[17:19])) - datetime(1970, 1, 1)).total_seconds())
+                        if configdict.get('date_taken_type', '0') == '1':
+                            dateTaken = dateExif
+                        if configdict.get('date_posted_type', '0') == '1':
+                            datePosted = dateUnix
+                            #Use year and month from dateExif, then calculate end of month (note: Flickr does not accept future dates. You'll get current date maximum)
+                            if configdict.get('date_posted_granularity', '0') == '4':
+                                datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+                                datePostedM = int(datetime.fromtimestamp(datePosted).strftime("%m"))
+                                datePostedD = calendar.monthrange(datePostedY, datePostedM)[1]
+                                datePosted = int((datetime(datePostedY, datePostedM, datePostedD, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+                            #Use year from dateExif, then calculate end of year (note: Flickr does not accept future dates. You'll get current date maximum)
+                            if configdict.get('date_posted_granularity', '0') == '6':
+                                datePostedY = int(datetime.fromtimestamp(datePosted).strftime("%Y"))
+                                datePosted = int((datetime(datePostedY, 12, 31, 23, 59, 59) - datetime(1970, 1, 1)).total_seconds())
+                            #Convert timestamp to GMT zone
+                            dateZone =  configdict.get('date_posted_utc', '0')
+                            if dateZone != '0':
+                                datePosted = datePosted - int(dateZone)*3600
 
                 # look for additional tags in EXIF to tag picture with
                 if XPKEYWORDS in exiftags:
@@ -487,8 +487,8 @@ class Uploadr:
                 logging.debug( "successful.")
                 photoid = str(res.photoid.text)
                 self.logUpload(photoid, folderTag)
-		if configdict.get('override_dates', '0') == '1':
-			self.overrideDates(image, photoid, datePosted, dateTaken, dateTakenGranularity)
+                if configdict.get('override_dates', '0') == '1':
+                    self.overrideDates(image, photoid, datePosted, dateTaken, dateTakenGranularity)
                 return photoid
             else :
                 print "problem.."
@@ -522,7 +522,7 @@ class Uploadr:
         6 Y
         8 Circa
         """
-	try:
+        try:
             photoID = str( photoID )
             logging.debug("Setting date_posted: %s and date_taken: %s for %s with id %s", str( datePosted ), str( dateTaken ), image, photoID)
             d = {
@@ -531,7 +531,7 @@ class Uploadr:
                 "date_posted": str( datePosted ),
                 "date_taken": str( dateTaken ),
                 "date_taken_granularity" : str( granularity ),
-		"photo_id"  : photoID,
+                "photo_id"  : photoID,
             }
             sig = signCall(d)
             d[ api.sig ] = sig
@@ -544,7 +544,7 @@ class Uploadr:
             else :
                 print "problem.."
                 reportError(res)
-	except KeyboardInterrupt:
+        except KeyboardInterrupt:
             logging.debug("Keyboard interrupt seen, abandon uploads")
             print "Stopping uploads..."
 
