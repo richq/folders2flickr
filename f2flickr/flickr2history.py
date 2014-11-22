@@ -9,6 +9,7 @@ __author__ = "pkolarov@gmail.com"
 import logging
 import shelve
 import sys
+import os
 import f2flickr.flickr as flickr
 
 def getPhotoIDbyTag(tag, user):
@@ -52,13 +53,67 @@ def getPhotoIDbyTag(tag, user):
 
     return photos[0]
 
+def convert_format(images, imageDir, historyFile):
+    """
+    Convert a history file from old format to new that allows updated local files
+    to be synced.
+    For each file, store the following information:
+    - Photo ID from Flickr
+    - Modification time
+    - Size of file
+    """
+    logging.debug('flickr2history: Started convert_format')
+    try:
+        user = flickr.test_login()
+        logging.debug(user.id)
+    except:
+        logging.error(sys.exc_info()[0])
+        return None
+
+    uploaded = shelve.open( historyFile )
+    num_images=len(images)
+    num_ok=0
+    num_converted=0
+    num_not_found=0
+    for i,image in enumerate(images):
+        if (i+1) % 1000 == 0:
+            sys.stdout.write('.'); sys.stdout.flush()
+        full_image_path=image
+        # remove absolute directory
+        image = str(image[len(imageDir):])
+        if uploaded.has_key(image):
+            if isinstance(uploaded[image], tuple):
+                num_ok += 1
+                continue
+        logging.debug("Converting history data for photo %s", image)
+        try:
+            photo_id=uploaded[image]
+        except KeyError:
+            logging.debug('Photo %s cannot be found from history file' % image)
+            num_not_found += 1
+            continue
+        stats = os.stat(full_image_path)
+        file_mtime=stats.st_mtime
+        file_size=stats.st_size
+        uploaded[ image] = ( photo_id, file_mtime, file_size )
+        uploaded[ photo_id ] = image
+        num_converted += 1
+    sys.stdout.write('\n'); sys.stdout.flush()
+    logging.info('num_images=%d num_ok=%d num_not_found=%d num_converted=%d' %
+                     (num_images, num_ok, num_not_found, num_converted))
+    uploaded.close()
+
 def reshelf(images,  imageDir, historyFile):
     """
     Store image reference in the history file if its not there yet and if we
     actually can find it on Flickr.
+    For each file, store the following information:
+    - Photo ID from Flickr
+    - Modification time
+    - Size of file
     """
 
-    logging.debug('flickr2history: Started flickr2history')
+    logging.debug('flickr2history: Started reshelf')
     try:
         user = flickr.test_login()
         logging.debug(user.id)
@@ -68,21 +123,28 @@ def reshelf(images,  imageDir, historyFile):
 
     for image in images:
         # remove absolute directory
+        full_image_path=image
         image = image[len(imageDir):]
         # its better to always reopen this file
         uploaded = shelve.open( historyFile )
         if uploaded.has_key(str(image)):
-            continue
+            if isinstance(uploaded[str(image)], tuple):
+                uploaded.close()
+                continue
         # each picture should have one id tag in the folder format with spaces
         # replaced by # and starting with #
         flickrtag = '#' + image.replace(' ','#')
         photo = getPhotoIDbyTag(flickrtag, user)
         logging.debug(image)
+        logging.debug(photo)
         if not photo:
             uploaded.close()  # flush the DB file
             continue
         logging.debug("flickr2history: Reregistering %s photo "+
                       "in local history file", image)
-        uploaded[ str(image)] = str(photo.id)
+        stats = os.stat(full_image_path)
+        file_mtime=stats.st_mtime
+        file_size=stats.st_size
+        uploaded[ str(image)] = ( str(photo.id), file_mtime, file_size )
         uploaded[ str(photo.id) ] =str(image)
         uploaded.close()
