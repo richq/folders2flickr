@@ -28,7 +28,8 @@ __version__ = "$Rev: 42 $"
 __date__ = "$Date: 2008-11-19 14:36:57 +0100 (Wed, 19 Nov 2008) $"
 __copyright__ = "Copyright: 2004-2006 James Clarke; Portions: 2007-2008 Joshua Henderson"
 
-from urllib import urlencode, urlopen
+from urllib import urlencode
+from urllib2 import urlopen
 from xml.dom import minidom
 import hashlib
 import os
