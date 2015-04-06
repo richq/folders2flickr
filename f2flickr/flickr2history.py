@@ -63,12 +63,6 @@ def convert_format(images, imageDir, historyFile):
     - Size of file
     """
     logging.debug('flickr2history: Started convert_format')
-    try:
-        user = flickr.test_login()
-        logging.debug(user.id)
-    except:
-        logging.error(sys.exc_info()[0])
-        return None
 
     uploaded = shelve.open( historyFile )
     num_images=len(images)
@@ -92,9 +86,13 @@ def convert_format(images, imageDir, historyFile):
             logging.debug('Photo %s cannot be found from history file' % image)
             num_not_found += 1
             continue
-        stats = os.stat(full_image_path)
-        file_mtime=stats.st_mtime
-        file_size=stats.st_size
+        try:
+            stats = os.stat(full_image_path)
+            file_mtime=stats.st_mtime
+            file_size=stats.st_size
+        except OSError:
+            file_mtime = 0
+            file_size = 0
         uploaded[ image] = ( photo_id, file_mtime, file_size )
         uploaded[ photo_id ] = image
         num_converted += 1

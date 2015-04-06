@@ -9,6 +9,9 @@ import tempfile
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 import fakeflickr
 import shelve
+import f2flickr.flickr2history
+import f2flickr.tags2set
+import f2flickr.configuration
 
 def setSubsetsTrue():
     tmp = open('uploadr.ini', 'r')
@@ -41,7 +44,6 @@ class Tags2SetTest(unittest.TestCase):
         sample = open('uploadr.ini.sample', 'r')
         inifile.write(sample.read())
         inifile.close()
-        import f2flickr.tags2set
 
     def tearDown(self):
         os.unlink('uploadr.ini')
@@ -52,25 +54,36 @@ class Tags2SetTest(unittest.TestCase):
         First upload 20 photos, then upload some more, up to 44
         The 44 should be in the set.
         """
-        import f2flickr.tags2set
         historyFile = tempfile.mktemp()
         fakeuploaded = shelve.open(historyFile)
         for i in range(1, 21):
-            fakeuploaded[str(i)] = 'random/img%d.jpg' % i
+            fakeuploaded[str(i)] = '/random/img%d.jpg' % i
 
         addinvert(fakeuploaded)
+        images = [k for k in fakeuploaded if k.startswith('/random')]
         fakeuploaded.close()
+        f2flickr.flickr2history.convert_format(images,
+                                               '',
+                                               historyFile)
 
         uploaded = [str(r) for r in range(1, 21)]
         f2flickr.tags2set.createSets(uploaded, historyFile)
         user = fakeflickr.fakelogin()
         self.assertEquals(1, len(user.getPhotosets()))
+        ps = user.getPhotosets()[0]
+        photos = ps.getPhotos()
+        self.assertEquals(20, len(photos))
 
         fakeuploaded = shelve.open(historyFile)
+        fakeuploaded.clear()
         for i in range(1, 45):
-            fakeuploaded[str(i)] = 'random/img%d.jpg' % i
+            fakeuploaded[str(i)] = '/random/img%d.jpg' % i
         addinvert(fakeuploaded)
+        images = [k for k in fakeuploaded if k.startswith('/random')]
         fakeuploaded.close()
+        f2flickr.flickr2history.convert_format(images,
+                                               '',
+                                               historyFile)
 
         uploaded = [str(r) for r in range(22, 45)]
         f2flickr.tags2set.createSets(uploaded, historyFile)
@@ -98,7 +111,6 @@ class Tags2SetTest(unittest.TestCase):
         """
         Check only_sub_sets = false
         """
-        import f2flickr.tags2set
         uploaded, historyFile = self.createHistory()
         f2flickr.configuration.configdict = f2flickr.configuration.ConfigDict()
         f2flickr.tags2set.createSets(uploaded, historyFile)
@@ -112,8 +124,6 @@ class Tags2SetTest(unittest.TestCase):
         """
         Check only_sub_sets = false
         """
-        import f2flickr.tags2set
-        import f2flickr.configuration
         uploaded, historyFile = self.createHistory()
         setSubsetsTrue()
         f2flickr.configuration.configdict = f2flickr.configuration.ConfigDict()
@@ -127,7 +137,6 @@ class Tags2SetTest(unittest.TestCase):
         """
         Create 2 simple sets, shouldn't create 3
         """
-        import f2flickr.tags2set
         historyFile = tempfile.mktemp()
         fakeuploaded = shelve.open(historyFile)
         setSubsetsTrue()
