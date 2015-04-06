@@ -82,6 +82,7 @@ def createSets(uploadedNow, historyFile):
             return None
         existingSets = user.getPhotosets()
     except:
+        logging.error("createSets error logging in/getPhotosets")
         logging.error(sys.exc_info()[0])
         return None
 
