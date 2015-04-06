@@ -33,11 +33,14 @@ import webbrowser
 import exifread
 import string
 from datetime import timedelta, datetime, time, date, tzinfo
+from itertools import groupby
+from os.path import dirname
 import calendar
 
 import f2flickr.flickr as flickr
 import f2flickr.tags2set as tags2set
 from f2flickr.configuration import configdict
+from flickr2history import convert_format
 from xml.dom import minidom
 
 #
@@ -382,8 +385,34 @@ class Uploadr:
                 folderTag = image[len(dirname):]
                 break
 
-        if folderTag is None or self.uploaded.has_key(folderTag):
+        if folderTag is None:
             return None
+
+        if self.uploaded.has_key(folderTag):
+            stats=os.stat(image)
+            logging.info('The file %s already exists: mtime=%d, size=%d' %
+                         (image, stats.st_mtime, stats.st_size))
+            data=self.uploaded[folderTag]
+            if not isinstance(data, tuple):
+                logging.error('Should not have non-tuple data but continuing in any case')
+                self.uploaded[folderTag] = (data, stats.st_mtime, stats.st_size)
+                return None
+            else:
+                photo_id=data[0]
+                mtime=data[1]
+                filesize=data[2]
+                if mtime != stats.st_mtime or filesize != stats.st_size:
+                    logging.info('File has changed since previous time')
+                    logging.info('Removing %s from Flickr before edding' % data[0])
+                    photo=flickr.Photo(data[0])
+                    try:
+                        photo.delete()
+                        del self.uploaded[folderTag]
+                        del self.uploaded[photo_id]
+                    except flickr.FlickrError:
+                        logging.info('File does not exist, adding')
+                else:
+                    return None
 
         try:
             logging.debug("Getting EXIF for %s", image)
@@ -491,7 +520,7 @@ class Uploadr:
             if isGood(res):
                 logging.debug( "successful.")
                 photoid = str(res.photoid.text)
-                self.logUpload(photoid, folderTag)
+                self.logUpload(photoid, folderTag, image)
                 if configdict.get('override_dates', '0') == '1':
                     self.overrideDates(image, photoid, datePosted, dateTaken, dateTakenGranularity)
                 return photoid
@@ -508,13 +537,16 @@ class Uploadr:
         return None
 
 
-    def logUpload( self, photoID, imageName ):
+    def logUpload( self, photoID, imageName, image_file_name ):
         """
         Records the uploaded photo in the history file
         """
         photoID = str( photoID )
         imageName = str( imageName )
-        self.uploaded[ imageName ] = photoID
+        st = os.stat( image_file_name )
+        file_mtime=st.st_mtime
+        file_size=st.st_size
+        self.uploaded[ imageName ] = (photoID, file_mtime, file_size)
         self.uploaded[ photoID ] = imageName
         self.uploaded.close()
         self.uploaded = shelve.open( HISTORY_FILE )
@@ -604,7 +636,7 @@ def main():
     Initial entry point for the uploads
     """
     logging.basicConfig(level=logging.DEBUG,
-                format='%(asctime)s %(levelname)s %(message)s',
+                format='%(asctime)s %(levelname)s %(filename)s:%(lineno)s - %(funcName)20s() %(message)s',
                 filename='debug.log',
                 filemode='w')
     logging.debug('Started')
@@ -614,25 +646,33 @@ def main():
 
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
-    console.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+    console.setFormatter(logging.Formatter('%(asctime)s %(filename)s:%(lineno)s - %(funcName)20s() %(message)s'))
     logging.getLogger('').addHandler(console)
 
     uploadinstance = Uploadr()
     if not uploadinstance.checkToken():
         uploadinstance.authenticate()
 
+    logging.info('Finding new photos from folder %s' % IMAGE_DIR)
     images = grabNewImages(IMAGE_DIR)
-    logging.debug("Uploading images: %s", str(images))
+    logging.info('Found %d images' % len(images))
+    
+    # Convert history file to new format, if necessary.
+    logging.info('Converting existing history file to new format, if needed')
+    convert_format(images, IMAGE_DIR, HISTORY_FILE)
+    logging.info('Conversion complete')
 
     #uploads all images that are in folders and not in history file
+    logging.debug("Uploading %d images", len(images))
     uploadedNow = []
-    for uploaded in uploadinstance.upload(images):
-        uploadedNow.append(uploaded)
-        if len(uploadedNow) > 20:
+    for key, group in groupby(images, key=lambda x:dirname(x)):
+        for uploaded in uploadinstance.upload(group):
+            uploadedNow.append(uploaded)
+        if len(uploadedNow) > 0:
             tags2set.createSets(uploadedNow, HISTORY_FILE)
             uploadedNow = []
-    if len(uploadedNow) > 0:
-        tags2set.createSets(uploadedNow, HISTORY_FILE)
+        if uploadinstance.abandonUploads==True:
+            break
 
 if __name__ == "__main__":
     main()
