@@ -375,9 +375,14 @@ class Uploadr:
         """
         Upload a single image. Returns the photoid, or None on failure.
         """
-        folderTag = image[len(IMAGE_DIR):]
+        folderTag = None
+        manydirname = IMAGE_DIR.split(";")
+        for dirname in manydirname:
+            if image.startswith(dirname):
+                folderTag = image[len(dirname):]
+                break
 
-        if self.uploaded.has_key(folderTag):
+        if folderTag is None or self.uploaded.has_key(folderTag):
             return None
 
         try:
@@ -568,27 +573,29 @@ def ignoreMatch(name, patterns):
             return True
     return False
 
-def grabNewImages(dirname):
+def grabNewImages(manydirname):
     """
     get all images in folders and subfolders which match extensions below
     """
     images = []
-    for dirpath, dirnames, filenames in os.walk(dirname, topdown=True, followlinks=True):
-        ignore = '.f2fignore' in filenames
-        # use os.stat here
-        ignoreglobs = []
-        if ignore:
-            fp = open(os.path.normpath(os.path.join(dirpath, '.f2fignore')))
-            ignoreglobs = parseIgnore(fp.readlines())
-            fp.close()
-        dirnames[:] = [d for d in dirnames if not d[0] == '.'
-                       and not ignoreMatch(d, ignoreglobs)]
-        for f in filenames:
-            if f.startswith('.'):
-                continue
-            ext = f.lower().split(".")[-1]
-            if ext in ALLOWED_EXT and not ignoreMatch(f, ignoreglobs):
-                images.append(os.path.normpath(os.path.join(dirpath, f)))
+    manydirname = manydirname.split(";")
+    for dirname in manydirname:
+        for dirpath, dirnames, filenames in os.walk(dirname, topdown=True, followlinks=True):
+            ignore = '.f2fignore' in filenames
+            # use os.stat here
+            ignoreglobs = []
+            if ignore:
+                fp = open(os.path.normpath(os.path.join(dirpath, '.f2fignore')))
+                ignoreglobs = parseIgnore(fp.readlines())
+                fp.close()
+            dirnames[:] = [d for d in dirnames if not d[0] == '.'
+                           and not ignoreMatch(d, ignoreglobs)]
+            for f in filenames:
+                if f.startswith('.'):
+                    continue
+                ext = f.lower().split(".")[-1]
+                if ext in ALLOWED_EXT and not ignoreMatch(f, ignoreglobs):
+                    images.append(os.path.normpath(os.path.join(dirpath, f)))
     images.sort()
     return images
 

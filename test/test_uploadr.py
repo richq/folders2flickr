@@ -113,6 +113,22 @@ class UploadrTest(unittest.TestCase):
         images = sorted(f2flickr.uploadr.grabNewImages(tempdir))
         self.assertEquals(3, len(images))
 
+    def testFindFilesMulti(self):
+        """
+        Check find files
+        """
+        import f2flickr.uploadr
+        tempdir = tempfile.mkdtemp()
+        tempdirs = [os.path.join(tempdir, 'subdir%d'%d) for d in range(1, 4)]
+        [os.mkdir(d) for d in tempdirs]
+
+        for d in tempdirs:
+            for i in range(1, 4):
+                tmpfile = open(os.path.join(d, 'img%d.jpg'%i), 'w')
+                tmpfile.close()
+        images = sorted(f2flickr.uploadr.grabNewImages(';'.join(tempdirs)))
+        self.assertEquals(9, len(images))
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(levelname)s %(message)s',
