@@ -382,8 +382,8 @@ class Uploadr:
 
         if self.uploaded.has_key(folderTag):
             stats=os.stat(image)
-            logging.info('The file %s already exists: mtime=%d, size=%d' %
-                         (image, stats.st_mtime, stats.st_size))
+            logging.debug('The file %s already exists: mtime=%d, size=%d',
+                         image, stats.st_mtime, stats.st_size)
             data=self.uploaded[folderTag]
             if not isinstance(data, tuple):
                 logging.error('Should not have non-tuple data but continuing in any case')
@@ -395,7 +395,7 @@ class Uploadr:
                 filesize=data[2]
                 if mtime != stats.st_mtime or filesize != stats.st_size:
                     logging.info('File has changed since previous time')
-                    logging.info('Removing %s from Flickr before edding' % data[0])
+                    logging.info('Removing %s from Flickr before updating', data[0])
                     photo=flickr.Photo(data[0])
                     try:
                         photo.delete()
