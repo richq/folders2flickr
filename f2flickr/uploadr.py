@@ -529,7 +529,7 @@ class Uploadr:
             self.abandonUploads = True
             return None
         except:
-            logging.error(sys.exc_info())
+            logging.exception("Upload failed")
         return None
 
 
