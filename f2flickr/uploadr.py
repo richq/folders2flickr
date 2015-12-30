@@ -606,16 +606,25 @@ def grabNewImages(dirname):
     get all images in folders and subfolders which match extensions below
     """
     images = []
+    treeIgnore = {}
     for dirpath, dirnames, filenames in os.walk(dirname, topdown=True, followlinks=True):
         ignore = '.f2fignore' in filenames
         # use os.stat here
-        ignoreglobs = []
         if ignore:
+            # add the content of the ignore file to dictionary
             fp = open(os.path.normpath(os.path.join(dirpath, '.f2fignore')))
-            ignoreglobs = parseIgnore(fp.readlines())
+            treeIgnore[dirpath] = parseIgnore(fp.readlines())
             fp.close()
+
+        # build the ignore list from this dir parents ignore files
+        ignoreglobs = []
+        for path, lines in treeIgnore.iteritems():
+            if path in dirpath:
+                ignoreglobs += lines
+
         dirnames[:] = [d for d in dirnames if not d[0] == '.'
                        and not ignoreMatch(d, ignoreglobs)]
+
         for f in filenames:
             if f.startswith('.'):
                 continue
@@ -650,7 +659,7 @@ def main():
     logging.info('Finding new photos from folder %s' % IMAGE_DIR)
     images = grabNewImages(IMAGE_DIR)
     logging.info('Found %d images' % len(images))
-    
+
     # Convert history file to new format, if necessary.
     logging.info('Converting existing history file to new format, if needed')
     convert_format(images, IMAGE_DIR, HISTORY_FILE)
