@@ -61,7 +61,9 @@ if they are not in the correct format.
 
 If you add the file `.f2fignore` to a directory then it can be used to ignore
 files and subdirectories.  Ignored files will not be uploaded, and the script
-will not descend into ignored subdirectories.
+will not descend into ignored subdirectories. The ignore pattern is cumulative
+over the directory tree, so you can specify a general pattern at a top level
+directory and it will apply to sub-directories too.
 
 The contents of the `.f2fignore` file is a series of glob patterns,
 one pattern or filename per line. Subdirectories are also ignored if they

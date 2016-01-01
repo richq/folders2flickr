@@ -113,6 +113,27 @@ class UploadrTest(unittest.TestCase):
         images = sorted(f2flickr.uploadr.grabNewImages(tempdir))
         self.assertEquals(3, len(images))
 
+    def testIgnoreTree(self):
+        """
+        Check ignore tree works
+        """
+        import f2flickr.uploadr
+        tempdir = tempfile.mkdtemp()
+        os.mkdir(os.path.join(tempdir, 'holidays'))
+        os.mkdir(os.path.join(tempdir, 'holidays', 'sub1'))
+        for i in range(1, 4):
+            tmpfile = open(os.path.join(tempdir, 'holidays', 'img%d.jpg'%i), 'w')
+            tmpfile.close()
+        tmpfile = open(os.path.join(tempdir, 'holidays', 'big.avi'), 'w')
+        tmpfile.close()
+        tmpfile = open(os.path.join(tempdir, 'holidays', 'sub1', 'big2.avi'), 'w')
+        tmpfile.close()
+        tmpfile = open(os.path.join(tempdir, 'holidays', '.f2fignore'), 'w')
+        tmpfile.write("*.avi\n")
+        tmpfile.close()
+        images = sorted(f2flickr.uploadr.grabNewImages(tempdir))
+        self.assertEquals(3, len(images))
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(levelname)s %(message)s',
