@@ -187,7 +187,14 @@ class Photo(object):
         tags = uniq(tags)
         _dopost(method, auth=True, photo_id=self.id, tags=tags)
         self._load_properties()
+    
+    def delete(self):
+        """Delete photo from flickr
+        (flickr.photos.delete)
+        """
+        method = 'flickr.photos.delete'
 
+        _dopost(method, auth=True, photo_id=self.id)
 
     def addTags(self, tags):
         """Adds the list of tags to current tags. (flickr.photos.addtags)
