@@ -24,6 +24,10 @@ def _creatSet(photoSet, setName, existingSets):
         photos.append(flickr.Photo(id = photo))
 
     fset = None
+    # Ensure the desired set name isn't empty
+    if not setName:
+        return fset
+    
     unicodeSetName = setName.decode(sys.getfilesystemencoding())
     #check if set with the name exists already
     generate = 'Generating'
