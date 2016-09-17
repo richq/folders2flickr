@@ -491,8 +491,11 @@ class Uploadr:
                 if XPKEYWORDS in exiftags:
                     printable = exiftags[XPKEYWORDS].printable
                     if len(printable) > 4:
-                        exifstring = exifread.make_string(eval(printable))
-                        picTags += exifstring.replace(';', ' ')
+                        try:
+                            exifstring = exifread.make_string(eval(printable))
+                            picTags += exifstring.replace(';', ' ')
+                        except:
+                            logging.exception("Skipping unexpected EXIF data in %s", image)
 
             picTags = picTags.strip()
             logging.info("Uploading image %s with tags %s", image, picTags)
@@ -529,7 +532,7 @@ class Uploadr:
             self.abandonUploads = True
             return None
         except:
-            logging.exception("Upload failed")
+            logging.exception("Upload failed %s", image)
         return None
 
 
